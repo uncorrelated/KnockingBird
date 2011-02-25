@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -30,13 +32,12 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class Bubble extends JFrame implements WindowListener, Runnable {
+public class Bubble extends JFrame implements WindowListener {
 	private Canvas canvas = null;
 	private JSpinner jspr1 = null;
 	private volatile int move_x = 0, move_y = 0, radius = 65;
 	private BufferedImage image = null;
-	private Thread thread = null;
-	private volatile boolean flag = true;
+	private Timer timer = null;
 
 	public Bubble() throws IOException {
 		super("鳥が体をゆする");
@@ -64,11 +65,10 @@ public class Bubble extends JFrame implements WindowListener, Runnable {
 		cnt.add(jspr1);
 		add(cnt, BorderLayout.SOUTH);
 
-		thread = new Thread(this);
-		thread.start();
-
 		setUI();
 		setVisible(true);
+		timer = new Timer();
+		timer.scheduleAtFixedRate(new KnockingTask(), 0, 50);
 	}
 
 	private int range(int n, int min, int max){
@@ -123,30 +123,19 @@ public class Bubble extends JFrame implements WindowListener, Runnable {
 		}
 	}
 
-	private int span = 20;
-	private int y_direction = 2;
-	private void knock(){
-		int speed = 3;
-        move_y += y_direction;
-        if(span/2<move_y){
-        	y_direction = -1*speed;
-        } else if(move_y < -1*span/2) {
-        	y_direction = speed;
-        }
-	}
-
-	private long calcWait(){
-		return 20 + 50*Math.abs(move_y)/span;
-	}
-	
-	public void run() {
-		while (flag) {
-			try {
-				synchronized (thread) {
-					thread.wait(calcWait());
-				}
-			} catch (InterruptedException e) {
-			}
+	private class KnockingTask extends TimerTask {
+		private int span = 20;
+		private int y_direction = 2;
+		private void knock(){
+			int speed = 2 + 5*Math.abs(move_y)/span;;
+	        move_y += y_direction;
+	        if(span/2<move_y){
+	        	y_direction = -1*speed;
+	        } else if(move_y < -1*span/2) {
+	        	y_direction = speed;
+	        }
+		}
+		public void run() {
 			knock();
 			canvas.repaint();
 		}
@@ -171,15 +160,7 @@ public class Bubble extends JFrame implements WindowListener, Runnable {
 	}
 
 	public void windowClosing(WindowEvent e) {
-		flag = false;
-		synchronized (thread) {
-			thread.notify();
-		}
-		try {
-			thread.join(1000);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
+		timer.cancel();
 		System.exit(0);
 	}
 
