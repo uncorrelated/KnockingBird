@@ -32,13 +32,13 @@ import javax.swing.event.ChangeListener;
 
 public class Bubble extends JFrame implements WindowListener, Runnable {
 	private Canvas canvas = null;
-	private JSpinner jspr1 = null, jspr2 = null;
-	private int move_x = 0, move_y = 0, radius = 60;
+	private JSpinner jspr1 = null;
+	private volatile int move_x = 0, move_y = 0, radius = 65;
 	private BufferedImage image = null;
 	private Thread thread = null;
 	private volatile boolean flag = true;
 
-	public Bubble(String fname) throws IOException {
+	public Bubble() throws IOException {
 		super("鳥が体をゆする");
 		image = ImageIO.read(this.getClass().getResource("a_bird.jpg"));
 		canvas = new ImgCanvas();
@@ -59,20 +59,9 @@ public class Bubble extends JFrame implements WindowListener, Runnable {
 		        canvas.repaint();
 			}
 		});
-		
-		jspr2 = new JSpinner(new SpinnerNumberModel(move_y, -100, 100, 1));
-		jspr2.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent ce) {
-		        JSpinner sp = (JSpinner)ce.getSource();
-		        Number n = (Number)sp.getValue();
-		        move_y = n.intValue();
-		        canvas.repaint();
-			}
-		});
 
 		cnt.add(new JLabel("歪み"));
 		cnt.add(jspr1);
-		cnt.add(jspr2);
 		add(cnt, BorderLayout.SOUTH);
 
 		thread = new Thread(this);
@@ -102,7 +91,7 @@ public class Bubble extends JFrame implements WindowListener, Runnable {
 				int dy = y - cy;
 				double len = Math.sqrt(dx*dx + dy*dy);
 				double frc = len/r;
-				double eff = 1>frc ? Math.sqrt(1-frc):0;
+				double eff = 1 > frc ? Math.sqrt(1 - frc):0;
 				if(eff<0)
 					eff = 0;
 				int sx = range(x + (int)(eff*mx), 0, w - 1);
@@ -120,7 +109,7 @@ public class Bubble extends JFrame implements WindowListener, Runnable {
 	private class ImgCanvas extends Canvas {
 		public void paint(Graphics g) {
 			int ix = image.getWidth()/2 - 8;
-			int iy = image.getHeight()/2 - 24;
+			int iy = image.getHeight()/2 - 8;
 			Dimension d = getSize();
 			Image dbuf = createImage(d.width, d.height);
 			Graphics gd = dbuf.getGraphics();
@@ -134,26 +123,27 @@ public class Bubble extends JFrame implements WindowListener, Runnable {
 		}
 	}
 
-	private int y_direction = 1;
+	private int span = 20;
+	private int y_direction = 2;
 	private void knock(){
-        Number n = (Number)jspr2.getValue();
-        move_y = n.intValue();
+		int speed = 3;
         move_y += y_direction;
-        jspr2.setValue(new Integer(move_y));
-        int span = 18;
         if(span/2<move_y){
-        	y_direction = -1;
+        	y_direction = -1*speed;
         } else if(move_y < -1*span/2) {
-        	y_direction = 1;
+        	y_direction = speed;
         }
-        canvas.repaint();
 	}
 
+	private long calcWait(){
+		return 20 + 50*Math.abs(move_y)/span;
+	}
+	
 	public void run() {
 		while (flag) {
 			try {
 				synchronized (thread) {
-					thread.wait(100);
+					thread.wait(calcWait());
 				}
 			} catch (InterruptedException e) {
 			}
@@ -209,7 +199,7 @@ public class Bubble extends JFrame implements WindowListener, Runnable {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Bubble bubble = new Bubble(args[0]);
+		Bubble bubble = new Bubble();
 	}
 
 }
