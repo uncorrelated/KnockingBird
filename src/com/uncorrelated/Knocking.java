@@ -74,7 +74,8 @@ public class Knocking extends JFrame implements WindowListener {
 
 	public Knocking() throws IOException {
 		super("Image Swinger");
-		setImage(this.getClass().getResource("natsume_nana.jpg"));
+		// http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/
+		setImage(this.getClass().getResource("3386409319_7ca53351e8.jpg"));
 		setResizable(false);
 		setLocationRelativeTo(null);
 		addWindowListener(this);
@@ -104,7 +105,7 @@ public class Knocking extends JFrame implements WindowListener {
 		gbc3.gridx = 1;
 		gbc3.gridy = 1;
 		gbc3.gridwidth = 2;
-		jsl1 = new JSlider(5, 40, 20);
+		jsl1 = new JSlider(5, 40, 15);
 		gbl.setConstraints(jsl1, gbc3);
 		add(jsl1);
 
@@ -119,7 +120,7 @@ public class Knocking extends JFrame implements WindowListener {
 		gbc5.gridx = 1;
 		gbc5.gridy = 2;
 		gbc5.gridwidth = 2;
-		jsl2 = new JSlider(2, 10, 5);
+		jsl2 = new JSlider(2, 10, 4);
 		gbl.setConstraints(jsl2, gbc5);
 		add(jsl2);
 
