@@ -6,6 +6,9 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -19,6 +22,9 @@ import java.util.Timer;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JScrollBar;
+import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -27,21 +33,63 @@ public class Knocking extends JFrame implements WindowListener {
 	private Canvas canvas = null;
 	private BufferedImage image = null;
 	private Timer timer = null;
-	private SwingImageTask sImage = new SwingImageTask();
+	private SwingImageTask siTask = new SwingImageTask();
+	private JSlider jsl1, jsl2;
 
 	public Knocking() throws IOException {
 		super("鳥が体をゆする");
 		image = ImageIO.read(this.getClass().getResource("a_bird.jpg"));
-		canvas = new ImgCanvas();
-		setSize(image.getWidth() + 16, image.getHeight() + 64);
+		setSize(320, 320);
+		setLocationRelativeTo(null);
 		addWindowListener(this);
-		setLayout(new BorderLayout());
-		add(canvas, BorderLayout.CENTER);
-		sImage.setComponent(canvas);
+		
+		GridBagLayout gbl = new GridBagLayout();
+		setLayout(gbl);
+
+		GridBagConstraints gbc1 = new GridBagConstraints();
+		gbc1.ipady = 8;
+		gbc1.gridx = gbc1.gridy = 0;
+		gbc1.gridwidth = 3;
+		canvas = new ImgCanvas();
+		canvas.setSize(image.getWidth(), image.getHeight());
+		gbl.setConstraints(canvas, gbc1);
+		add(canvas);
+		siTask.setComponent(canvas);
+		
+		GridBagConstraints gbc2 = new GridBagConstraints();
+		gbc2.gridx = 0;
+		gbc2.gridy = 1;
+		JLabel jl1 = new JLabel("揺れの大きさ");
+		gbl.setConstraints(jl1, gbc2);
+		add(jl1);
+		
+		GridBagConstraints gbc3 = new GridBagConstraints();
+		gbc3.gridx = 1;
+		gbc3.gridy = 1;
+		gbc3.gridwidth = 2;
+		jsl1 = new JSlider(3, 40, 20);
+		gbl.setConstraints(jsl1, gbc3);
+		add(jsl1);
+		
+		GridBagConstraints gbc4 = new GridBagConstraints();
+		gbc4.gridx = 0;
+		gbc4.gridy = 2;
+		JLabel jl2 = new JLabel("揺れの速さ");
+		gbl.setConstraints(jl2, gbc4);
+		add(jl2);
+		
+		GridBagConstraints gbc5 = new GridBagConstraints();
+		gbc5.gridx = 1;
+		gbc5.gridy = 2;
+		gbc5.gridwidth = 2;
+		jsl2 = new JSlider(1, 10, 5);
+		gbl.setConstraints(jsl2, gbc5);
+		add(jsl2);
+		
 		setUI();
 		setVisible(true);
 		timer = new Timer();
-		timer.scheduleAtFixedRate(sImage, 0, 50);
+		timer.scheduleAtFixedRate(siTask, 0, 50);
 	}
 
 	
@@ -52,10 +100,10 @@ public class Knocking extends JFrame implements WindowListener {
 			addMouseMotionListener(this);
 		}
 		public void paint(Graphics g) {
-			Dimension d = getSize();
-			Image dbuf = createImage(d.width, d.height);
+			setSize(image.getWidth(), image.getHeight());
+			Image dbuf = createImage(image.getWidth(), image.getHeight());
 			Graphics gd = dbuf.getGraphics();
-			gd.drawImage(sImage.transform(image), 0, 0, this);
+			gd.drawImage(siTask.transform(image), 0, 0, this);
 			if(null!=mpp && null!=mmp){
 				int radius = length(mpp, mmp);
 				gd.setColor(Color.black);
@@ -93,14 +141,15 @@ public class Knocking extends JFrame implements WindowListener {
 		}
 		public void mouseReleased(MouseEvent arg0) {
 			mrp = arg0.getPoint();
-			sImage.setCenterX(mpp.x);
-			sImage.setCenterY(mpp.y);
+			siTask.setCenterX(mpp.x);
+			siTask.setCenterY(mpp.y);
 			int r = length(mpp, mrp);
-			int power = 22;
+			int power = jsl1.getValue();
 			int vx = 0 < r ? power*Math.abs(mrp.x - mpp.x)/r : 0;
 			int vy = 0 < r ? power*Math.abs(mrp.y - mpp.y)/r : 0;
-			sImage.setRadius(r);
-			sImage.setVector(vx, vy);
+			siTask.setRadius(r);
+			siTask.setVector(vx, vy);
+			siTask.setSpeed(jsl2.getValue());
 			mrp = mpp = mmp = null;
 		}
 		public void mouseDragged(MouseEvent e) {

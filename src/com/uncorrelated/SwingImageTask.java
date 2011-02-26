@@ -6,11 +6,12 @@ import java.util.TimerTask;
 
 public class SwingImageTask extends TimerTask {
 	private volatile int centerX = 0, centerY = 0, Radius = 60, vectorX,
-			vectorY, span = 1, deformation = 1, direction, count;
+			vectorY, span = 1, deformation = 1, direction, count, baseSpeed = 5;
 	private Component component = null;
 
 	private int speed(){
-		return 2 + 5 * Math.abs(deformation) / span;
+		int speed = baseSpeed/2 + baseSpeed * Math.abs(deformation) / span;
+		return span < speed ? span : speed;
 	}
 	
 	public void move() {
@@ -138,5 +139,9 @@ public class SwingImageTask extends TimerTask {
 		this.vectorX = vectorX;
 		this.vectorY = vectorY;
 		setup();
+	}
+
+	public void setSpeed(int arg){
+		baseSpeed = arg;
 	}
 }
