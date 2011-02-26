@@ -10,8 +10,7 @@ public class SwingBufferedImage {
 
 	private int speed(){
 		// baseSpeed * Math.abs(deformation) / span
-		int speed = baseSpeed;
-		speed = (int)(decline() * speed);
+		int speed = (int)(span * decline() * baseSpeed / 100);
 		if(speed<=0)
 			speed = 1;
 		return speed;
@@ -175,7 +174,7 @@ public class SwingBufferedImage {
 	
 	public void changePower(int p){
 		if(0<power){
-			span = power*span/p;
+			span = p*span/power;
 			if(0>=span)
 				span = 1;
 			power = p;

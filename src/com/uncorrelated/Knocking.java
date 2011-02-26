@@ -62,7 +62,7 @@ import javax.swing.filechooser.FileFilter;
 public class Knocking extends JFrame implements WindowListener, Runnable {
 	private Canvas canvas = null;
 	private BufferedImage image = null;
-	private int DefaultFrameRate = 30;
+	private int DefaultFrameRate = 10;
 	private SwingBufferedImage[] swingBI = new SwingBufferedImage[3];
 	private int numOfUse;
 	private JSlider jsl1, jsl2;
@@ -105,7 +105,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		JLabel jl1 = new JLabel("揺れの大きさ");
 		jl1.setPreferredSize(dm);
 		jsls1.add(jl1);
-		jsls1.add(jsl1 = new JSlider(12, 32, 22));
+		jsls1.add(jsl1 = new JSlider(10, 50, 20));
 		jsl1.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int v = jsl1.getValue();
@@ -127,7 +127,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		JLabel jl2 = new JLabel("揺れの速さ");
 		jl2.setPreferredSize(dm);
 		jsls2.add(jl2);
-		jsls2.add(jsl2 = new JSlider(1, 7, 4));
+		jsls2.add(jsl2 = new JSlider(1, 100, 25));
 		jsl2.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int v = jsl2.getValue();
