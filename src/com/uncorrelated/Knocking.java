@@ -74,7 +74,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private volatile boolean flag = true;
 
 	public Knocking() throws IOException {
-		super("Image Swinger");
+		super("Knocking Bird");
 		// http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/
 		setImage(this.getClass().getResource("3386409319_7ca53351e8.jpg"));
 		setResizable(false);
@@ -256,9 +256,9 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 					swingBI[c].reset();
 			rescaleImage();
 			int width = image.getWidth() + 64;
-			if(400 > width)
-				width = 400;
-			setSize(width, image.getHeight() + 128);
+			if(420 > width)
+				width = 420;
+			setSize(width, image.getHeight() + 200);
 			if (null != canvas) {
 				canvas.setSize(image.getWidth(), image.getHeight());
 			}
@@ -421,8 +421,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 					swingBI[cptr].setCenterY(mpp.y);
 					int r = length(mpp, mrp);
 					int power = jsl1.getValue();
-					int vx = 0 < r ? power * Math.abs(mrp.x - mpp.x) / r : 0;
-					int vy = 0 < r ? power * Math.abs(mrp.y - mpp.y) / r : 0;
+					int vx = 0 < r ? power * (mrp.x - mpp.x) / r : 0;
+					int vy = 0 < r ? power * (mrp.y - mpp.y) / r : 0;
 					swingBI[cptr].setRadius(r);
 					swingBI[cptr].setVector(vx, vy);
 					swingBI[cptr].setSpeed(jsl2.getValue());

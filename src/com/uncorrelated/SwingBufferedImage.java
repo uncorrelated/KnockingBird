@@ -118,7 +118,7 @@ public class SwingBufferedImage {
 		span = (int)Math.sqrt(vectorX*vectorX + vectorY*vectorY);
 		if(0>=span)
 			span = 1;
-		direction = vectorX*vectorY <0 ? -1 : 1;
+		direction = 1;
 		baseCount = count = span*speed();
 	}
 	
