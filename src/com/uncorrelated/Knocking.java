@@ -61,13 +61,18 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
 public class Knocking extends JFrame implements WindowListener {
 	private Canvas canvas = null;
 	private BufferedImage image = null;
 	private Timer timer = null;
-	private SwingBufferedImage[] swingBI = new SwingBufferedImage[2];
+	private TimerTask timerTask = null;
+	private int DefaultFrameRate = 30;
+	private SwingBufferedImage[] swingBI = new SwingBufferedImage[3];
+	private int numOfUse;
 	private JSlider jsl1, jsl2;
 	private JPopupMenu pmenu;
 	private JMenuItem[] jmi;
@@ -83,6 +88,7 @@ public class Knocking extends JFrame implements WindowListener {
 
 		for (int c = 0; c < swingBI.length; c++)
 			swingBI[c] = new SwingBufferedImage();
+		numOfUse = 2;
 
 		GridBagLayout gbl = new GridBagLayout();
 		setLayout(gbl);
@@ -102,6 +108,16 @@ public class Knocking extends JFrame implements WindowListener {
 		jsls1.setLayout(new FlowLayout());
 		jsls1.add(new JLabel("揺れの大きさ"));
 		jsls1.add(jsl1 = new JSlider(4, 40, 22));
+		jsl1.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				synchronized(timer){
+					int v = jsl1.getValue();
+					for(int c=0;c<swingBI.length;c++){
+						swingBI[c].changePower(v);
+					}
+				}
+			}
+		});
 		gbl.setConstraints(jsls1, gbc2);
 		add(jsls1);
 		
@@ -111,7 +127,14 @@ public class Knocking extends JFrame implements WindowListener {
 		Container jsls2 = new Container();
 		jsls2.setLayout(new FlowLayout());
 		jsls2.add(new JLabel("揺れの速さ"));
-		jsls2.add(jsl2 = new JSlider(2, 10, 6));
+		jsls2.add(jsl2 = new JSlider(10, 60, DefaultFrameRate));
+		jsl2.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				timerTask.cancel();
+				timer.purge();
+				timer.scheduleAtFixedRate(timerTask = getTimerTask(), 0, 1000/jsl2.getValue());
+			}
+		});
 		gbl.setConstraints(jsls2, gbc3);
 		add(jsls2);
 
@@ -145,6 +168,11 @@ public class Knocking extends JFrame implements WindowListener {
 		jcb4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				IsDecline = ((JCheckBox)e.getSource()).isSelected();
+				synchronized(timer){
+					for(int c=0;c<numOfUse;c++){
+						swingBI[c].setDecline(IsDecline);
+					}
+				}
 				pmenu.setVisible(false);
 			}
 		});
@@ -191,23 +219,25 @@ public class Knocking extends JFrame implements WindowListener {
 		setUI();
 		setVisible(true);
 		timer = new Timer();
-		timer.scheduleAtFixedRate(new TimerTask() {
+		timer.scheduleAtFixedRate(timerTask = getTimerTask(), 0, 1000/DefaultFrameRate);
+	}
+	
+	private TimerTask getTimerTask(){
+		return new TimerTask() {
 			public void run() {
 				synchronized (timer) {
-					for (int c = 0; c < swingBI.length; c++)
+					for (int c = 0; c < numOfUse; c++)
 						swingBI[c].move();
 				}
 				canvas.repaint();
 			}
-		}, 0, 1000/60);
+		};
 	}
 	
 	private void changeSBNumber(int n) {
-		synchronized (timer) {
-			swingBI = new SwingBufferedImage[n];
-			for (int c = 0; c < swingBI.length; c++)
-				swingBI[c] = new SwingBufferedImage();
-		}
+		numOfUse = n;
+		for (int c = 0; c < swingBI.length; c++)
+			swingBI[c].reset();
 	}
 
 	private void setSize() {
@@ -387,10 +417,11 @@ public class Knocking extends JFrame implements WindowListener {
 					int vy = 0 < r ? power * Math.abs(mrp.y - mpp.y) / r : 0;
 					swingBI[cptr].setRadius(r);
 					swingBI[cptr].setVector(vx, vy);
-					swingBI[cptr].setSpeed(jsl2.getValue());
+					swingBI[cptr].setSpeed(4);
 					swingBI[cptr].setDecline(IsDecline);
+					swingBI[cptr].setPower(power);
 					mrp = mpp = mmp = null;
-					cptr = (cptr + 1) % swingBI.length;
+					cptr = (cptr + 1) % numOfUse;
 				}
 			} else if (arg0.isPopupTrigger()) {
 				pmenu.show(arg0.getComponent(), arg0.getX(), arg0.getY());

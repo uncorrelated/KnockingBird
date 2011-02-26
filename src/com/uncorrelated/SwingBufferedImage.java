@@ -4,12 +4,12 @@ import java.awt.image.BufferedImage;
 
 public class SwingBufferedImage {
 	private volatile int centerX = 0, centerY = 0, Radius = 0, vectorX,
-			vectorY, span = 1, deformation = 1, direction = 1, baseSpeed = 5;
+			vectorY, span = 1, deformation = 1, direction = 1, baseSpeed = 5, power = 0;
 	private volatile int count=0, baseCount=1;
 	private volatile boolean IsDecline = true;
 
 	private int speed(){
-		int speed = baseSpeed/2 + baseSpeed * Math.abs(deformation) / span;
+		int speed = baseSpeed + baseSpeed * Math.abs(deformation) / span;
 		return speed;
 	}
 
@@ -159,5 +159,20 @@ public class SwingBufferedImage {
 
 	public void setDecline(boolean d) {
 		IsDecline = d;
+	}
+
+	public int getPower() {
+		return power;
+	}
+
+	public void setPower(int power) {
+		this.power = power;
+	}
+	
+	public void changePower(int p){
+		if(0<power){
+			span = p*span/power;
+			power = p;
+		}
 	}
 }
