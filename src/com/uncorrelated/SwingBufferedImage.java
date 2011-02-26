@@ -9,7 +9,6 @@ public class SwingBufferedImage {
 	private volatile boolean IsDecline = true;
 
 	private int speed(){
-		// baseSpeed * Math.abs(deformation) / span
 		int speed = (int)(span * decline() * baseSpeed / 100);
 		if(speed<=0)
 			speed = 1;
@@ -33,8 +32,7 @@ public class SwingBufferedImage {
 			return;
 		}
 		float decline = decline();
-		float f = decline * direction * speed();
-		deformation += (int)(0<f ? Math.ceil(f) : Math.floor(f));
+		deformation += direction * speed();
 		int u_limit = (int)(decline * span / 2);
 		int l_limit = (int)(decline * -1 * span / 2);
 		if (u_limit < deformation) {
