@@ -31,22 +31,16 @@ import java.awt.event.WindowListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
-import javax.swing.Action;
-import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -57,7 +51,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -65,11 +58,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
-public class Knocking extends JFrame implements WindowListener {
+public class Knocking extends JFrame implements WindowListener, Runnable {
 	private Canvas canvas = null;
 	private BufferedImage image = null;
-	private Timer timer = null;
-	private TimerTask timerTask = null;
 	private int DefaultFrameRate = 30;
 	private SwingBufferedImage[] swingBI = new SwingBufferedImage[3];
 	private int numOfUse;
@@ -77,6 +68,9 @@ public class Knocking extends JFrame implements WindowListener {
 	private JPopupMenu pmenu;
 	private JMenuItem[] jmi;
 	private boolean IsDecline = true;
+	private Thread thread = null;
+	private volatile long waitOfThread;
+	private volatile boolean flag = true;
 
 	public Knocking() throws IOException {
 		super("Image Swinger");
@@ -110,8 +104,8 @@ public class Knocking extends JFrame implements WindowListener {
 		jsls1.add(jsl1 = new JSlider(4, 40, 22));
 		jsl1.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				synchronized(timer){
-					int v = jsl1.getValue();
+				int v = jsl1.getValue();
+				synchronized(swingBI){
 					for(int c=0;c<swingBI.length;c++){
 						swingBI[c].changePower(v);
 					}
@@ -127,12 +121,10 @@ public class Knocking extends JFrame implements WindowListener {
 		Container jsls2 = new Container();
 		jsls2.setLayout(new FlowLayout());
 		jsls2.add(new JLabel("揺れの速さ"));
-		jsls2.add(jsl2 = new JSlider(10, 60, DefaultFrameRate));
+		jsls2.add(jsl2 = new JSlider(10, 120, DefaultFrameRate));
 		jsl2.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				timerTask.cancel();
-				timer.purge();
-				timer.scheduleAtFixedRate(timerTask = getTimerTask(), 0, 1000/jsl2.getValue());
+				waitOfThread = 1000 / jsl2.getValue();
 			}
 		});
 		gbl.setConstraints(jsls2, gbc3);
@@ -168,7 +160,7 @@ public class Knocking extends JFrame implements WindowListener {
 		jcb4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				IsDecline = ((JCheckBox)e.getSource()).isSelected();
-				synchronized(timer){
+				synchronized(swingBI){
 					for(int c=0;c<numOfUse;c++){
 						swingBI[c].setDecline(IsDecline);
 					}
@@ -218,20 +210,26 @@ public class Knocking extends JFrame implements WindowListener {
 		
 		setUI();
 		setVisible(true);
-		timer = new Timer();
-		timer.scheduleAtFixedRate(timerTask = getTimerTask(), 0, 1000/DefaultFrameRate);
+
+		waitOfThread = 1000/DefaultFrameRate;
+		thread = new Thread(this);
+		thread.start();
 	}
 	
-	private TimerTask getTimerTask(){
-		return new TimerTask() {
-			public void run() {
-				synchronized (timer) {
+	public void run(){
+		while (flag) {
+			try {
+				synchronized (swingBI) {
 					for (int c = 0; c < numOfUse; c++)
 						swingBI[c].move();
+					canvas.repaint();
 				}
-				canvas.repaint();
+				synchronized (thread) {
+					thread.wait(waitOfThread);
+				}
+			} catch (InterruptedException e) {
 			}
-		};
+		}
 	}
 	
 	private void changeSBNumber(int n) {
@@ -406,9 +404,8 @@ public class Knocking extends JFrame implements WindowListener {
 		public void mouseReleased(MouseEvent arg0) {
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mrp = arg0.getPoint();
-				synchronized(timer){
-					if (cptr >= swingBI.length)
-						cptr = 0;
+				synchronized(swingBI){
+					cptr = cptr % numOfUse;
 					swingBI[cptr].setCenterX(mpp.x);
 					swingBI[cptr].setCenterY(mpp.y);
 					int r = length(mpp, mrp);
@@ -417,7 +414,7 @@ public class Knocking extends JFrame implements WindowListener {
 					int vy = 0 < r ? power * Math.abs(mrp.y - mpp.y) / r : 0;
 					swingBI[cptr].setRadius(r);
 					swingBI[cptr].setVector(vx, vy);
-					swingBI[cptr].setSpeed(4);
+					swingBI[cptr].setSpeed(2);
 					swingBI[cptr].setDecline(IsDecline);
 					swingBI[cptr].setPower(power);
 					mrp = mpp = mmp = null;
@@ -514,7 +511,15 @@ public class Knocking extends JFrame implements WindowListener {
 	}
 
 	public void windowClosing(WindowEvent e) {
-		timer.cancel();
+		flag = false;
+		synchronized (thread) {
+			thread.notify();
+		}
+		try {
+			thread.join(1000);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
 		System.exit(0);
 	}
 
