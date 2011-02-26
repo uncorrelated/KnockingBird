@@ -9,7 +9,8 @@ public class SwingBufferedImage {
 	private volatile boolean IsDecline = true;
 
 	private int speed(){
-		int speed = baseSpeed + baseSpeed * Math.abs(deformation) / span;
+		// baseSpeed * Math.abs(deformation) / span
+		int speed = baseSpeed;
 		speed = (int)(decline() * speed);
 		if(speed<=0)
 			speed = 1;
@@ -18,7 +19,7 @@ public class SwingBufferedImage {
 
 	public float decline(){
 		float decline = (float)count/baseCount;
-		return decline*decline;
+		return decline;
 	}
 	
 	public void decreaseCount(){
@@ -174,7 +175,9 @@ public class SwingBufferedImage {
 	
 	public void changePower(int p){
 		if(0<power){
-			span = p*span/power;
+			span = power*span/p;
+			if(0>=span)
+				span = 1;
 			power = p;
 		}
 	}

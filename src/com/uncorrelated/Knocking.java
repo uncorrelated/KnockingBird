@@ -102,10 +102,20 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		Container jsls1 = new Container();
 		jsls1.setLayout(new FlowLayout());
 		Dimension dm = new Dimension(96, 16);
-		JLabel jl1 = new JLabel("揺れの最初の大きさ");
+		JLabel jl1 = new JLabel("揺れの大きさ");
 		jl1.setPreferredSize(dm);
 		jsls1.add(jl1);
-		jsls1.add(jsl1 = new JSlider(4, 40, 22));
+		jsls1.add(jsl1 = new JSlider(12, 32, 22));
+		jsl1.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				int v = jsl1.getValue();
+				synchronized(swingBI){
+					for(int c=0;c<numOfUse;c++){
+						swingBI[c].changePower(v);
+					}
+				}
+			}
+		});
 		gbl.setConstraints(jsls1, gbc2);
 		add(jsls1);
 		
@@ -117,10 +127,15 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		JLabel jl2 = new JLabel("揺れの速さ");
 		jl2.setPreferredSize(dm);
 		jsls2.add(jl2);
-		jsls2.add(jsl2 = new JSlider(10, 120, DefaultFrameRate));
+		jsls2.add(jsl2 = new JSlider(1, 7, 4));
 		jsl2.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				waitOfThread = 1000 / jsl2.getValue();
+				int v = jsl2.getValue();
+				synchronized(swingBI){
+					for(int c=0;c<numOfUse;c++){
+						swingBI[c].setSpeed(v);
+					}
+				}
 			}
 		});
 		gbl.setConstraints(jsls2, gbc3);
@@ -410,7 +425,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 					int vy = 0 < r ? power * Math.abs(mrp.y - mpp.y) / r : 0;
 					swingBI[cptr].setRadius(r);
 					swingBI[cptr].setVector(vx, vy);
-					swingBI[cptr].setSpeed(4);
+					swingBI[cptr].setSpeed(jsl2.getValue());
 					swingBI[cptr].setDecline(IsDecline);
 					swingBI[cptr].setPower(power);
 					mrp = mpp = mmp = null;
