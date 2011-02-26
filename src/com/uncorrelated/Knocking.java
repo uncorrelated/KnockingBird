@@ -71,6 +71,7 @@ public class Knocking extends JFrame implements WindowListener {
 	private JSlider jsl1, jsl2;
 	private JPopupMenu pmenu;
 	private JMenuItem[] jmi;
+	private boolean IsDecline = true;
 
 	public Knocking() throws IOException {
 		super("Image Swinger");
@@ -80,64 +81,39 @@ public class Knocking extends JFrame implements WindowListener {
 		setLocationRelativeTo(null);
 		addWindowListener(this);
 
+		for (int c = 0; c < swingBI.length; c++)
+			swingBI[c] = new SwingBufferedImage();
+
 		GridBagLayout gbl = new GridBagLayout();
 		setLayout(gbl);
 
 		GridBagConstraints gbc1 = new GridBagConstraints();
 		gbc1.ipady = 8;
 		gbc1.gridx = gbc1.gridy = 0;
-		gbc1.gridwidth = 3;
 		canvas = new ImgCanvas();
 		canvas.setSize(image.getWidth(), image.getHeight());
 		gbl.setConstraints(canvas, gbc1);
 		add(canvas);
-		for (int c = 0; c < swingBI.length; c++)
-			swingBI[c] = new SwingBufferedImage();
 
 		GridBagConstraints gbc2 = new GridBagConstraints();
 		gbc2.gridx = 0;
 		gbc2.gridy = 1;
-		JLabel jl1 = new JLabel("揺れの大きさ");
-		gbl.setConstraints(jl1, gbc2);
-		add(jl1);
-
+		Container jsls1 = new Container();
+		jsls1.setLayout(new FlowLayout());
+		jsls1.add(new JLabel("揺れの大きさ"));
+		jsls1.add(jsl1 = new JSlider(4, 40, 22));
+		gbl.setConstraints(jsls1, gbc2);
+		add(jsls1);
+		
 		GridBagConstraints gbc3 = new GridBagConstraints();
-		gbc3.gridx = 1;
-		gbc3.gridy = 1;
-		gbc3.gridwidth = 2;
-		jsl1 = new JSlider(5, 40, 15);
-		gbl.setConstraints(jsl1, gbc3);
-		add(jsl1);
-
-		GridBagConstraints gbc4 = new GridBagConstraints();
-		gbc4.gridx = 0;
-		gbc4.gridy = 2;
-		JLabel jl2 = new JLabel("揺れの速さ");
-		gbl.setConstraints(jl2, gbc4);
-		add(jl2);
-
-		GridBagConstraints gbc5 = new GridBagConstraints();
-		gbc5.gridx = 1;
-		gbc5.gridy = 2;
-		gbc5.gridwidth = 2;
-		jsl2 = new JSlider(2, 10, 4);
-		gbl.setConstraints(jsl2, gbc5);
-		add(jsl2);
-
-		pmenu = new JPopupMenu();
-		jmi = new JMenuItem[5];
-		pmenu.setPopupSize(112, 96);
-		jmi[0] = new JMenuItem();
-		jmi[0].setLayout(new GridLayout(1, 1));
-		JLabel jl_stop = new JLabel("停止");
-		jmi[0].add(jl_stop);
-		jmi[0].addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				for (int c = 0; c < swingBI.length; c++)
-					swingBI[c].reset();
-			}
-		});
-		pmenu.add(jmi[0]);
+		gbc3.gridx = 0;
+		gbc3.gridy = 2;
+		Container jsls2 = new Container();
+		jsls2.setLayout(new FlowLayout());
+		jsls2.add(new JLabel("揺れの速さ"));
+		jsls2.add(jsl2 = new JSlider(2, 10, 6));
+		gbl.setConstraints(jsls2, gbc3);
+		add(jsls2);
 
 		ButtonGroup group = new ButtonGroup();
 		JRadioButton jcb1 = new JRadioButton("1箇所揺らす", false);
@@ -165,30 +141,52 @@ public class Knocking extends JFrame implements WindowListener {
 		group.add(jcb2);
 		group.add(jcb3);
 
-		jmi[1] = new JMenuItem();
-		jmi[1].setLayout(new GridLayout(1, 1));
-		jmi[1].add(jcb1);
-		pmenu.add(jmi[1]);
+		JCheckBox jcb4 = new JCheckBox("減退", IsDecline);
+		jcb4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				IsDecline = ((JCheckBox)e.getSource()).isSelected();
+				pmenu.setVisible(false);
+			}
+		});
 
-		jmi[2] = new JMenuItem();
-		jmi[2].setLayout(new GridLayout(1, 1));
-		jmi[2].add(jcb2);
-		pmenu.add(jmi[2]);
+		GridBagConstraints gbc6 = new GridBagConstraints();
+		gbc6.gridx = 0;
+		gbc6.gridy = 3;
+		Container btns = new Container();
+		btns.setLayout(new GridLayout(1, 4));
+		btns.add(jcb1);
+		btns.add(jcb2);
+		btns.add(jcb3);
+		btns.add(jcb4);
+		gbl.setConstraints(btns, gbc6);
+		add(btns);
+		
+		pmenu = new JPopupMenu();
+		jmi = new JMenuItem[2];
+		int jmi_c = 0;
+		
+		pmenu.setPopupSize(112, 24*jmi.length);
+		jmi[jmi_c] = new JMenuItem();
+		jmi[jmi_c].setLayout(new GridLayout(1, 1));
+		JLabel jl_stop = new JLabel("停止");
+		jmi[jmi_c].add(jl_stop);
+		jmi[jmi_c].addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (int c = 0; c < swingBI.length; c++)
+					swingBI[c].reset();
+			}
+		});
+		pmenu.add(jmi[jmi_c++]);
 
-		jmi[3] = new JMenuItem();
-		jmi[3].setLayout(new GridLayout(1, 1));
-		jmi[3].add(jcb3);
-		pmenu.add(jmi[3]);
-
-		jmi[4] = new JMenuItem();
-		jmi[4].setLayout(new GridLayout(1, 1));
-		jmi[4].add(new JLabel("ファイルを選択"));
-		jmi[4].addActionListener(new ActionListener() {
+		jmi[jmi_c] = new JMenuItem();
+		jmi[jmi_c].setLayout(new GridLayout(1, 1));
+		jmi[jmi_c].add(new JLabel("ファイルを選択"));
+		jmi[jmi_c].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				openFileChooser();
 			}
 		});
-		pmenu.add(jmi[4]);
+		pmenu.add(jmi[jmi_c++]);
 		
 		setUI();
 		setVisible(true);
@@ -201,12 +199,11 @@ public class Knocking extends JFrame implements WindowListener {
 				}
 				canvas.repaint();
 			}
-		}, 0, 50);
+		}, 0, 1000/60);
 	}
 	
 	private void changeSBNumber(int n) {
 		synchronized (timer) {
-			jmi[n].setSelected(true);
 			swingBI = new SwingBufferedImage[n];
 			for (int c = 0; c < swingBI.length; c++)
 				swingBI[c] = new SwingBufferedImage();
@@ -219,7 +216,10 @@ public class Knocking extends JFrame implements WindowListener {
 				if(null!=swingBI[c])
 					swingBI[c].reset();
 			rescaleImage();
-			setSize(image.getWidth() + 64, image.getHeight() + 128);
+			int width = image.getWidth() + 64;
+			if(400 > width)
+				width = 400;
+			setSize(width, image.getHeight() + 128);
 			if (null != canvas) {
 				canvas.setSize(image.getWidth(), image.getHeight());
 			}
@@ -376,19 +376,22 @@ public class Knocking extends JFrame implements WindowListener {
 		public void mouseReleased(MouseEvent arg0) {
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mrp = arg0.getPoint();
-				if (cptr >= swingBI.length)
-					cptr = 0;
-				swingBI[cptr].setCenterX(mpp.x);
-				swingBI[cptr].setCenterY(mpp.y);
-				int r = length(mpp, mrp);
-				int power = jsl1.getValue();
-				int vx = 0 < r ? power * Math.abs(mrp.x - mpp.x) / r : 0;
-				int vy = 0 < r ? power * Math.abs(mrp.y - mpp.y) / r : 0;
-				swingBI[cptr].setRadius(r);
-				swingBI[cptr].setVector(vx, vy);
-				swingBI[cptr].setSpeed(jsl2.getValue());
-				mrp = mpp = mmp = null;
-				cptr = (cptr + 1) % swingBI.length;
+				synchronized(timer){
+					if (cptr >= swingBI.length)
+						cptr = 0;
+					swingBI[cptr].setCenterX(mpp.x);
+					swingBI[cptr].setCenterY(mpp.y);
+					int r = length(mpp, mrp);
+					int power = jsl1.getValue();
+					int vx = 0 < r ? power * Math.abs(mrp.x - mpp.x) / r : 0;
+					int vy = 0 < r ? power * Math.abs(mrp.y - mpp.y) / r : 0;
+					swingBI[cptr].setRadius(r);
+					swingBI[cptr].setVector(vx, vy);
+					swingBI[cptr].setSpeed(jsl2.getValue());
+					swingBI[cptr].setDecline(IsDecline);
+					mrp = mpp = mmp = null;
+					cptr = (cptr + 1) % swingBI.length;
+				}
 			} else if (arg0.isPopupTrigger()) {
 				pmenu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
 			}

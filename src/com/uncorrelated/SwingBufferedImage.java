@@ -4,27 +4,43 @@ import java.awt.image.BufferedImage;
 
 public class SwingBufferedImage {
 	private volatile int centerX = 0, centerY = 0, Radius = 0, vectorX,
-			vectorY, span = 1, deformation = 1, direction, count, baseSpeed = 5;
+			vectorY, span = 1, deformation = 1, direction = 1, baseSpeed = 5;
+	private volatile int count=0, baseCount=1;
+	private volatile boolean IsDecline = true;
 
 	private int speed(){
 		int speed = baseSpeed/2 + baseSpeed * Math.abs(deformation) / span;
-		return span < speed ? span : speed;
+		return speed;
+	}
+
+	public float decline(){
+		float decline = (float)count/baseCount;
+		return decline*decline;
+	}
+	
+	public void decreaseCount(){
+		if(IsDecline && 0<count){
+			if(0 == --count)
+				deformation = 0;
+		}
 	}
 	
 	public void move() {
-		if (0>=count)
+		if (0>=count){
 			return;
-//		if(speed > count)
-//			speed = count;
-		deformation += direction;
-		if (span / 2 < deformation) {
-			direction = -1 * speed();
-		} else if (deformation < -1 * span / 2) {
-			direction = speed();
 		}
-//		if(0 >= deformation*(deformation - direction) && 0<count){
-//			count--;
-//		}
+		float decline = decline();
+		float f = decline * direction * speed();
+		deformation += (int)(0<f ? Math.ceil(f) : Math.floor(f));
+		int u_limit = (int)(decline * span / 2);
+		int l_limit = (int)(decline * -1 * span / 2);
+		if (u_limit < deformation) {
+			direction = -1;
+			decreaseCount();
+		} else if (deformation < l_limit) {
+			direction = 1;
+			decreaseCount();
+		}
 	}
 
 	private int range(int n, int min, int max) {
@@ -101,15 +117,16 @@ public class SwingBufferedImage {
 		span = (int)Math.sqrt(vectorX*vectorX + vectorY*vectorY);
 		if(0>=span)
 			span = 1;
-		direction = speed();
-		count = span;
+		direction = vectorX*vectorY <0 ? -1 : 1;
+		baseCount = count = span*speed();
 	}
 	
 	public void reset(){
 		vectorX = 0;
 		vectorY = 0;
 		Radius = 0;
-		setup();
+		deformation = 0;
+		count = 0;
 	}
 	
 	public void setVectorX(int vectorX) {
@@ -134,5 +151,13 @@ public class SwingBufferedImage {
 
 	public void setSpeed(int arg){
 		baseSpeed = arg;
+	}
+
+	public boolean isDecline() {
+		return IsDecline;
+	}
+
+	public void setDecline(boolean d) {
+		IsDecline = d;
 	}
 }
