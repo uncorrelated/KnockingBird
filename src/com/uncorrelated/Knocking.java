@@ -3,6 +3,7 @@ package com.uncorrelated;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
@@ -100,18 +101,11 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbc2.gridy = 1;
 		Container jsls1 = new Container();
 		jsls1.setLayout(new FlowLayout());
-		jsls1.add(new JLabel("揺れの大きさ"));
+		Dimension dm = new Dimension(96, 16);
+		JLabel jl1 = new JLabel("揺れの最初の大きさ");
+		jl1.setPreferredSize(dm);
+		jsls1.add(jl1);
 		jsls1.add(jsl1 = new JSlider(4, 40, 22));
-		jsl1.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				int v = jsl1.getValue();
-				synchronized(swingBI){
-					for(int c=0;c<swingBI.length;c++){
-						swingBI[c].changePower(v);
-					}
-				}
-			}
-		});
 		gbl.setConstraints(jsls1, gbc2);
 		add(jsls1);
 		
@@ -120,7 +114,9 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbc3.gridy = 2;
 		Container jsls2 = new Container();
 		jsls2.setLayout(new FlowLayout());
-		jsls2.add(new JLabel("揺れの速さ"));
+		JLabel jl2 = new JLabel("揺れの速さ");
+		jl2.setPreferredSize(dm);
+		jsls2.add(jl2);
 		jsls2.add(jsl2 = new JSlider(10, 120, DefaultFrameRate));
 		jsl2.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
