@@ -68,7 +68,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private JSlider jsl1, jsl2;
 	private JPopupMenu pmenu;
 	private JMenuItem[] jmi;
-	private boolean IsDecline = true;
+	private boolean IsDecline = false;
 	private Thread thread = null;
 	private volatile long waitOfThread;
 	private volatile boolean flag = true;
@@ -410,7 +410,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 					int vy = 0 < r ? power * Math.abs(mrp.y - mpp.y) / r : 0;
 					swingBI[cptr].setRadius(r);
 					swingBI[cptr].setVector(vx, vy);
-					swingBI[cptr].setSpeed(2);
+					swingBI[cptr].setSpeed(4);
 					swingBI[cptr].setDecline(IsDecline);
 					swingBI[cptr].setPower(power);
 					mrp = mpp = mmp = null;
