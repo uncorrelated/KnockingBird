@@ -1,13 +1,10 @@
 package com.uncorrelated;
 
-import java.awt.Component;
 import java.awt.image.BufferedImage;
-import java.util.TimerTask;
 
-public class SwingImageTask extends TimerTask {
-	private volatile int centerX = 0, centerY = 0, Radius = 60, vectorX,
+public class SwingBufferedImage {
+	private volatile int centerX = 0, centerY = 0, Radius = 0, vectorX,
 			vectorY, span = 1, deformation = 1, direction, count, baseSpeed = 5;
-	private Component component = null;
 
 	private int speed(){
 		int speed = baseSpeed/2 + baseSpeed * Math.abs(deformation) / span;
@@ -71,11 +68,6 @@ public class SwingImageTask extends TimerTask {
 				/ span, vectorY * deformation / span);
 	}
 
-	public void run() {
-		move();
-		component.repaint();
-	}
-
 	public int getCenterX() {
 		return centerX;
 	}
@@ -100,14 +92,6 @@ public class SwingImageTask extends TimerTask {
 		Radius = radius;
 	}
 
-	public Component getComponent() {
-		return component;
-	}
-
-	public void setComponent(Component component) {
-		this.component = component;
-	}
-
 	public int getVectorX() {
 		return vectorX;
 	}
@@ -119,6 +103,13 @@ public class SwingImageTask extends TimerTask {
 			span = 1;
 		direction = speed();
 		count = span;
+	}
+	
+	public void reset(){
+		vectorX = 0;
+		vectorY = 0;
+		Radius = 0;
+		setup();
 	}
 	
 	public void setVectorX(int vectorX) {
