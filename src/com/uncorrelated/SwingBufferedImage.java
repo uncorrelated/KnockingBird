@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 public class SwingBufferedImage {
 	private volatile int centerX = 0, centerY = 0, Radius = 0, vectorX,
 			vectorY, span = 1, deformation = 1, direction = 1, baseSpeed = 5, power = 0;
+	private volatile double coefficient = 1;
 	private volatile int count=0, baseCount=1;
 	private volatile boolean IsDecline = true;
 
@@ -67,7 +68,7 @@ public class SwingBufferedImage {
 				int dy = y - cy;
 				double len = Math.sqrt(dx * dx + dy * dy);
 				double frc = len / r;
-				double eff = 1 > frc ? 1 - frc : 0;
+				double eff = 1 > frc ? Math.pow(1 - frc, coefficient) : 0;
 				int sx = range(x + (int)Math.round(eff * mx), 0, w - 1);
 				int sy = range(y + (int)Math.round(eff * my), 0, h - 1);
 				int ptr_dst = x + w * y;
@@ -176,5 +177,13 @@ public class SwingBufferedImage {
 				span = 1;
 			power = p;
 		}
+	}
+
+	public double getCoefficient() {
+		return coefficient;
+	}
+
+	public void setCoefficient(double coefficient) {
+		this.coefficient = coefficient;
 	}
 }

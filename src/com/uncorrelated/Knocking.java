@@ -65,7 +65,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private int DefaultFrameRate = 10;
 	private SwingBufferedImage[] swingBI = new SwingBufferedImage[3];
 	private int numOfUse;
-	private JSlider jsl1, jsl2;
+	private JSlider jsl1, jsl2, jsl3;
 	private JPopupMenu pmenu;
 	private JMenuItem[] jmi;
 	private boolean IsDecline = false;
@@ -141,6 +141,28 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbl.setConstraints(jsls2, gbc3);
 		add(jsls2);
 
+		GridBagConstraints gbc4 = new GridBagConstraints();
+		gbc4.gridx = 0;
+		gbc4.gridy = 3;
+		Container jsls3 = new Container();
+		jsls3.setLayout(new FlowLayout());
+		JLabel jl3 = new JLabel("オブジェクトの丸み");
+		jl3.setPreferredSize(dm);
+		jsls3.add(jl3);
+		jsls3.add(jsl3 = new JSlider(50, 150, 100));
+		jsl3.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				double v = getCoefficient();
+				synchronized(swingBI){
+					for(int c=0;c<numOfUse;c++){
+						swingBI[c].setCoefficient(v);
+					}
+				}
+			}
+		});
+		gbl.setConstraints(jsls3, gbc4);
+		add(jsls3);
+		
 		ButtonGroup group = new ButtonGroup();
 		JRadioButton jcb1 = new JRadioButton("1箇所揺らす", false);
 		JRadioButton jcb2 = new JRadioButton("2箇所揺らす", true);
@@ -182,7 +204,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 
 		GridBagConstraints gbc6 = new GridBagConstraints();
 		gbc6.gridx = 0;
-		gbc6.gridy = 3;
+		gbc6.gridy = 4;
 		Container btns = new Container();
 		btns.setLayout(new GridLayout(1, 4));
 		btns.add(jcb1);
@@ -225,6 +247,10 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		waitOfThread = 1000/DefaultFrameRate;
 		thread = new Thread(this);
 		thread.start();
+	}
+	
+	public double getCoefficient(){
+		return ((double)200 - jsl3.getValue())/100;
 	}
 	
 	public void run(){
@@ -428,6 +454,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 					swingBI[cptr].setSpeed(jsl2.getValue());
 					swingBI[cptr].setDecline(IsDecline);
 					swingBI[cptr].setPower(power);
+					swingBI[cptr].setCoefficient(getCoefficient());
 					mrp = mpp = mmp = null;
 					cptr = (cptr + 1) % numOfUse;
 				}
