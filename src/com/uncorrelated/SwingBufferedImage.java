@@ -4,38 +4,39 @@ import java.awt.image.BufferedImage;
 
 public class SwingBufferedImage {
 	private volatile int centerX = 0, centerY = 0, Radius = 0, vectorX,
-			vectorY, span = 1, deformation = 1, direction = 1, baseSpeed = 5, power = 0;
+			vectorY, span = 1, deformation = 1, direction = 1, baseSpeed = 5,
+			power = 0;
 	private volatile double coefficient = 1;
-	private volatile int count=0, baseCount=1;
+	private volatile int count = 0, baseCount = 1;
 	private volatile boolean IsDecline = true;
 
-	private int speed(){
-		int speed = (int)(span * decline() * baseSpeed / 100);
-		if(speed<=0)
+	private int speed() {
+		int speed = (int) (span * decline() * baseSpeed / 100);
+		if (speed <= 0)
 			speed = 1;
 		return speed;
 	}
 
-	public float decline(){
-		float decline = (float)count/baseCount;
+	public float decline() {
+		float decline = (float) count / baseCount;
 		return decline;
 	}
-	
-	public void decreaseCount(){
-		if(IsDecline && 0<count){
-			if(0 == --count)
+
+	public void decreaseCount() {
+		if (IsDecline && 0 < count) {
+			if (0 == --count)
 				deformation = 0;
 		}
 	}
-	
+
 	public void move() {
-		if (0>=count){
+		if (0 >= count) {
 			return;
 		}
 		float decline = decline();
 		deformation += direction * speed();
-		int u_limit = (int)(decline * span / 2);
-		int l_limit = (int)(decline * -1 * span / 2);
+		int u_limit = (int) (decline * span / 2);
+		int l_limit = (int) (decline * -1 * span / 2);
 		if (u_limit < deformation) {
 			direction = -1;
 			decreaseCount();
@@ -43,7 +44,7 @@ public class SwingBufferedImage {
 			direction = 1;
 			decreaseCount();
 		}
-		if(0==deformation)
+		if (0 == deformation)
 			move();
 	}
 
@@ -56,7 +57,7 @@ public class SwingBufferedImage {
 	}
 
 	private BufferedImage transform(BufferedImage src, int cx, int cy, int r,
-			int mx, int my) {
+			int mx, int my, double coefficient) {
 		int w = src.getWidth();
 		int h = src.getHeight();
 		BufferedImage dst = new BufferedImage(w, h, src.getType());
@@ -64,25 +65,56 @@ public class SwingBufferedImage {
 		int[] bmd = new int[bms.length];
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
+				int ptr_dst = x + w * y;
 				int dx = x - cx;
 				int dy = y - cy;
 				double len = Math.sqrt(dx * dx + dy * dy);
 				double frc = len / r;
-				double eff = 1 > frc ? Math.pow(1 - frc, coefficient) : 0;
-				int sx = range(x + (int)Math.round(eff * mx), 0, w - 1);
-				int sy = range(y + (int)Math.round(eff * my), 0, h - 1);
-				int ptr_dst = x + w * y;
-				int ptr_src = sx + w * sy;
-				bmd[ptr_dst] = bms[ptr_dst];
-				bmd[ptr_dst] = bms[ptr_src];
+				if (1 > frc) {
+					double eff = 1 > frc ? Math.pow(1 - frc, coefficient) : 0;
+					double smx = eff * mx;
+					double smy = eff * my;
+					int cmx = (int) Math.floor(smx);
+					int cmy = (int) Math.floor(smy);
+					int sx1 = range(x + cmx, 0, w - 1);
+					int sy1 = range(y + cmy, 0, h - 1);
+					int sx2 = range(sx1 + 1, 0, w - 1);
+					int sy2 = range(sy1 + 1, 0, h - 1);
+					double a = smx - cmx;
+					double b = smy - cmy;
+					bmd[ptr_dst] = mean(bms[sx1 + w * sy1], bms[sx1 + w * sy2],
+							bms[sx2 + w * sy1], bms[sx2 + w * sy2], a, b);
+				} else {
+					bmd[ptr_dst] = bms[ptr_dst];
+				}
 			}
 		}
 		dst.setRGB(0, 0, w, h, bmd, 0, w);
 		return dst;
 	}
 
+	private int mean(int p11, int p12, int p21, int p22, double a, double b) {
+		double r11 = (1 - a) * (1 - b);
+		double r12 = a * (1 - b);
+		double r21 = (1 - a) * b;
+		double r22 = a * b;
+		int red = 0x00ff0000 & (int) (r11 * (0x00ff0000 & p11) + r12
+				* (0x00ff0000 & p12) + r21 * (0x00ff0000 & p21) + r22
+				* (0x00ff0000 & p22));
+		int green = 0x0000ff00 & (int) (r11 * (0x0000ff00 & p11) + r12
+				* (0x0000ff00 & p12) + r21 * (0x0000ff00 & p21) + r22
+				* (0x0000ff00 & p22));
+		int blue = 0x000000ff & (int) (r11 * (0x000000ff & p11) + r12
+				* (0x000000ff & p12) + r21 * (0x000000ff & p21) + r22
+				* (0x000000ff & p22));
+		return red | green | blue;
+	}
+
 	public BufferedImage transform(BufferedImage src) {
-		return transform(src, centerX, centerY, Radius, vectorX * deformation / span, vectorY * deformation / span);
+		if (0 >= Radius)
+			return src;
+		return transform(src, centerX, centerY, Radius, vectorX * deformation
+				/ span, vectorY * deformation / span, coefficient);
 	}
 
 	public int getCenterX() {
@@ -113,23 +145,23 @@ public class SwingBufferedImage {
 		return vectorX;
 	}
 
-	private void setup(){
+	private void setup() {
 		deformation = 0;
-		span = (int)Math.sqrt(vectorX*vectorX + vectorY*vectorY);
-		if(0>=span)
+		span = (int) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+		if (0 >= span)
 			span = 1;
 		direction = 1;
-		baseCount = count = span*speed();
+		baseCount = count = span * speed();
 	}
-	
-	public void reset(){
+
+	public void reset() {
 		vectorX = 0;
 		vectorY = 0;
 		Radius = 0;
 		deformation = 0;
 		count = 0;
 	}
-	
+
 	public void setVectorX(int vectorX) {
 		this.vectorX = vectorX;
 		setup();
@@ -150,7 +182,7 @@ public class SwingBufferedImage {
 		setup();
 	}
 
-	public void setSpeed(int arg){
+	public void setSpeed(int arg) {
 		baseSpeed = arg;
 	}
 
@@ -169,11 +201,11 @@ public class SwingBufferedImage {
 	public void setPower(int power) {
 		this.power = power;
 	}
-	
-	public void changePower(int p){
-		if(0<power){
-			span = p*span/power;
-			if(0>=span)
+
+	public void changePower(int p) {
+		if (0 < power) {
+			span = p * span / power;
+			if (0 >= span)
 				span = 1;
 			power = p;
 		}
