@@ -63,7 +63,7 @@ import javax.swing.filechooser.FileFilter;
 public class Knocking extends JFrame implements WindowListener, Runnable {
 	private Canvas canvas = null;
 	private BufferedImage image = null;
-	private int DefaultFrameRate = 10;
+	private int FrameRate = 10;
 	private SwingBufferedImage[] swingBI = new SwingBufferedImage[3];
 	private int numOfUse;
 	private JSlider jsl1, jsl2, jsl3;
@@ -73,7 +73,6 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private Thread thread = null;
 	private volatile long waitOfThread;
 	private volatile boolean flag = true;
-	private int HeightOfControl = 0;
 
 	public Knocking() throws IOException {
 		super("Knocking Bird");
@@ -242,14 +241,13 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		});
 		pmenu.add(jmi[jmi_c++]);
 
-		HeightOfControl = 14*dm.height;
 		setSize();
 		moveCenter();
 
 		setUI();
 		setVisible(true);
 
-		waitOfThread = 1000/DefaultFrameRate;
+		waitOfThread = 1000/FrameRate;
 		thread = new Thread(this);
 		thread.start();
 	}
@@ -390,6 +388,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			MouseMotionListener, DropTargetListener {
 		private Point mpp = null, mrp = null, mmp = null;
 		private int cptr = 0;
+		private boolean IsMeasureFrameRate = false;
+		private int nof = 0, sec = (int)System.currentTimeMillis()/1000;
 
 		public ImgCanvas() {
 			addMouseListener(this);
@@ -417,6 +417,16 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				gd.drawLine(mpp.x, mpp.y, mmp.x, mmp.y);
 			}
 			g.drawImage(dbuf, 0, 0, this);
+			if(IsMeasureFrameRate){
+				nof++;
+				int csec = (int)(System.currentTimeMillis()/1000);
+				if(sec < csec){
+					int mt = csec - sec;
+					System.out.println((float)nof/mt);
+					sec = csec;
+					nof = 0;
+				}
+			}
 		}
 
 		private int length(Point p1, Point p2) {
