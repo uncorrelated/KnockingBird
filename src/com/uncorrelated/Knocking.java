@@ -72,6 +72,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private Thread thread = null;
 	private volatile long waitOfThread;
 	private volatile boolean flag = true;
+	private int HeightOfControl = 0;
 
 	public Knocking() throws IOException {
 		super("Knocking Bird");
@@ -118,7 +119,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		});
 		gbl.setConstraints(jsls1, gbc2);
 		add(jsls1);
-		
+
 		GridBagConstraints gbc3 = new GridBagConstraints();
 		gbc3.gridx = 0;
 		gbc3.gridy = 2;
@@ -146,7 +147,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbc4.gridy = 3;
 		Container jsls3 = new Container();
 		jsls3.setLayout(new FlowLayout());
-		JLabel jl3 = new JLabel("オブジェクトの丸み");
+		JLabel jl3 = new JLabel("湾曲部の丸み");
 		jl3.setPreferredSize(dm);
 		jsls3.add(jl3);
 		jsls3.add(jsl3 = new JSlider(50, 150, 100));
@@ -213,7 +214,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		btns.add(jcb4);
 		gbl.setConstraints(btns, gbc6);
 		add(btns);
-		
+	
 		pmenu = new JPopupMenu();
 		jmi = new JMenuItem[2];
 		int jmi_c = 0;
@@ -240,7 +241,10 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			}
 		});
 		pmenu.add(jmi[jmi_c++]);
-		
+
+		HeightOfControl = 14*dm.height;
+		setSize();
+
 		setUI();
 		setVisible(true);
 
@@ -284,7 +288,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			int width = image.getWidth() + 64;
 			if(420 > width)
 				width = 420;
-			setSize(width, image.getHeight() + 200);
+			setSize(width, image.getHeight() + HeightOfControl);
 			if (null != canvas) {
 				canvas.setSize(image.getWidth(), image.getHeight());
 			}
