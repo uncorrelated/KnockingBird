@@ -45,6 +45,7 @@ import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -62,11 +63,10 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
 public class Knocking extends JFrame implements WindowListener, Runnable {
-	private Canvas canvas = null;
+	private ImgCanvas canvas = null;
 	private BufferedImage image = null;
 	private int FrameRate = 10;
-	private SwingBufferedImage[] swingBI = new SwingBufferedImage[3];
-	private int numOfUse;
+	private SwingBufferedImage[] swingBI = new SwingBufferedImage[10];
 	private JSlider jsl1, jsl2, jsl3;
 	private JPopupMenu pmenu;
 	private JMenuItem[] jmi;
@@ -85,7 +85,6 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 
 		for (int c = 0; c < swingBI.length; c++)
 			swingBI[c] = new SwingBufferedImage();
-		numOfUse = 2;
 
 		GridBagLayout gbl = new GridBagLayout();
 		setLayout(gbl);
@@ -112,7 +111,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			public void stateChanged(ChangeEvent e) {
 				int v = jsl1.getValue();
 				synchronized(swingBI){
-					for(int c=0;c<numOfUse;c++){
+					for(int c=0;c<swingBI.length;c++){
 						swingBI[c].changePower(v);
 					}
 				}
@@ -134,7 +133,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			public void stateChanged(ChangeEvent e) {
 				int v = jsl2.getValue();
 				synchronized(swingBI){
-					for(int c=0;c<numOfUse;c++){
+					for(int c=0;c<swingBI.length;c++){
 						swingBI[c].setSpeed(v);
 					}
 				}
@@ -156,7 +155,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			public void stateChanged(ChangeEvent e) {
 				double v = getCoefficient();
 				synchronized(swingBI){
-					for(int c=0;c<numOfUse;c++){
+					for(int c=0;c<swingBI.length;c++){
 						swingBI[c].setCoefficient(v);
 					}
 				}
@@ -165,38 +164,12 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbl.setConstraints(jsls3, gbc4);
 		add(jsls3);
 		
-		ButtonGroup group = new ButtonGroup();
-		JRadioButton jcb1 = new JRadioButton("1箇所揺らす", false);
-		JRadioButton jcb2 = new JRadioButton("2箇所揺らす", true);
-		JRadioButton jcb3 = new JRadioButton("3箇所揺らす", true);
-		jcb1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				changeSBNumber(1);
-				pmenu.setVisible(false);
-			}
-		});
-		jcb2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				changeSBNumber(2);
-				pmenu.setVisible(false);
-			}
-		});
-		jcb3.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				changeSBNumber(3);
-				pmenu.setVisible(false);
-			}
-		});
-		group.add(jcb1);
-		group.add(jcb2);
-		group.add(jcb3);
-
 		JCheckBox jcb4 = new JCheckBox("減退", IsDecline);
 		jcb4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				IsDecline = ((JCheckBox)e.getSource()).isSelected();
 				synchronized(swingBI){
-					for(int c=0;c<numOfUse;c++){
+					for(int c=0;c<swingBI.length;c++){
 						swingBI[c].setDecline(IsDecline);
 					}
 				}
@@ -209,13 +182,17 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbc6.gridy = 4;
 		Container btns = new Container();
 		btns.setLayout(new GridLayout(1, 4));
-		btns.add(jcb1);
-		btns.add(jcb2);
-		btns.add(jcb3);
 		btns.add(jcb4);
+		JButton stop_b = new JButton("全停止");
+		stop_b.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				stopAllSwing();
+			}
+		});
+		btns.add(stop_b);
 		gbl.setConstraints(btns, gbc6);
 		add(btns);
-	
+
 		pmenu = new JPopupMenu();
 		jmi = new JMenuItem[2];
 		int jmi_c = 0;
@@ -223,12 +200,11 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		pmenu.setPopupSize(112, 24*jmi.length);
 		jmi[jmi_c] = new JMenuItem();
 		jmi[jmi_c].setLayout(new GridLayout(1, 1));
-		JLabel jl_stop = new JLabel("停止");
+		JLabel jl_stop = new JLabel("マウス下の揺れを停止");
 		jmi[jmi_c].add(jl_stop);
 		jmi[jmi_c].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				for (int c = 0; c < swingBI.length; c++)
-					swingBI[c].reset();
+				canvas.stopSwing();
 			}
 		});
 		pmenu.add(jmi[jmi_c++]);
@@ -266,11 +242,16 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		return ((double)200 - jsl3.getValue())/100;
 	}
 	
+	private void stopAllSwing(){
+		for (int c = 0; c < swingBI.length; c++)
+			swingBI[c].reset();
+	}
+	
 	public void run(){
 		while (flag) {
 			try {
 				synchronized (swingBI) {
-					for (int c = 0; c < numOfUse; c++)
+					for (int c = 0; c < swingBI.length; c++)
 						swingBI[c].move();
 					canvas.repaint();
 				}
@@ -280,12 +261,6 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			} catch (InterruptedException e) {
 			}
 		}
-	}
-	
-	private void changeSBNumber(int n) {
-		numOfUse = n;
-		for (int c = 0; c < swingBI.length; c++)
-			swingBI[c].reset();
 	}
 
 	private void setSize() {
@@ -394,32 +369,31 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		private int cptr = 0;
 		private boolean IsMeasureFrameRate = false;
 		private int nof = 0, sec = (int)System.currentTimeMillis()/1000;
+		private int mouse_x, mouse_y;
 
 		public ImgCanvas() {
 			addMouseListener(this);
 			addMouseMotionListener(this);
 		}
 
+	
 		public void paint(Graphics g) {
 			Image dbuf = createImage(image.getWidth(), image.getHeight());
 			Graphics gd = dbuf.getGraphics();
 			BufferedImage bi = image;
-			for (int c = 0; c < numOfUse; c++)
+			for (int c = 0; c < swingBI.length; c++)
 				bi = swingBI[c].transform(bi);
 			gd.drawImage(bi, 0, 0, this);
 			if (null != mpp && null != mmp) {
 				int radius = length(mpp, mmp);
-				gd.setColor(Color.black);
-				drawCircle(gd, mpp.x, mpp.y, radius - 1);
-				drawCircle(gd, mpp.x, mpp.y, radius + 1);
-				gd.setColor(Color.yellow);
-				drawCircle(gd, mpp.x, mpp.y, radius);
+				drawBoldCircle(gd, mpp, radius, Color.yellow);
 				gd.setColor(Color.black);
 				gd.drawLine(mpp.x + 1, mpp.y, mmp.x + 1, mmp.y);
 				gd.drawLine(mpp.x - 1, mpp.y, mmp.x - 1, mmp.y);
 				gd.setColor(Color.yellow);
 				gd.drawLine(mpp.x, mpp.y, mmp.x, mmp.y);
 			}
+			drawSwingCircle(gd);
 			g.drawImage(dbuf, 0, 0, this);
 			if(IsMeasureFrameRate){
 				nof++;
@@ -441,6 +415,38 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 
 		private void drawCircle(Graphics g, int x, int y, int r) {
 			g.drawArc(x - r, y - r, 2 * r, 2 * r, 0, 360);
+		}
+
+		private void drawBoldCircle(Graphics g, Point p, int r, Color color){
+			g.setColor(Color.black);
+			drawCircle(g, p.x, p.y, r - 1);
+			drawCircle(g, p.x, p.y, r + 1);
+			g.setColor(color);
+			drawCircle(g, p.x, p.y, r);
+		}
+
+		public void stopSwing(){
+			for (int c = 0; c < swingBI.length; c++){
+				int dx = swingBI[c].getCenterX() - mouse_x;
+				int dy = swingBI[c].getCenterY() - mouse_y;
+				int r = swingBI[c].getRadius();
+				if(r*r >= dx*dx + dy*dy){
+					swingBI[c].reset();
+				}
+			}
+		}
+		
+		public void drawSwingCircle(Graphics g){
+			for (int c = 0; c < swingBI.length; c++){
+				int cx = swingBI[c].getCenterX();
+				int dx = cx - mouse_x;
+				int cy = swingBI[c].getCenterY();
+				int dy = cy - mouse_y;
+				int r = swingBI[c].getRadius();
+				if(r*r >= dx*dx + dy*dy){
+					drawBoldCircle(g, new Point(cx, cy), r, Color.pink);
+				}
+			}
 		}
 
 		public void update(Graphics g) {
@@ -468,7 +474,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mrp = arg0.getPoint();
 				synchronized(swingBI){
-					cptr = cptr % numOfUse;
+					cptr = cptr % swingBI.length;
 					swingBI[cptr].setCenterX(mpp.x);
 					swingBI[cptr].setCenterY(mpp.y);
 					int r = length(mpp, mrp);
@@ -482,7 +488,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 					swingBI[cptr].setPower(power);
 					swingBI[cptr].setCoefficient(getCoefficient());
 					mrp = mpp = mmp = null;
-					cptr = (cptr + 1) % numOfUse;
+					cptr = (cptr + 1) % swingBI.length;
 				}
 			} else if (arg0.isPopupTrigger()) {
 				pmenu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
@@ -494,6 +500,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 
 		public void mouseMoved(MouseEvent e) {
+			mouse_x = e.getX();
+			mouse_y = e.getY();
 		}
 
 		private DropTarget dropTarget = new DropTarget(this,
