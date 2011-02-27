@@ -10,6 +10,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -76,6 +77,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 
 	public Knocking() throws IOException {
 		super("Knocking Bird");
+		setUI();
 		// http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/
 		setImage(this.getClass().getResource("3386409319_7ca53351e8.jpg"));
 		setResizable(false);
@@ -242,10 +244,12 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		pmenu.add(jmi[jmi_c++]);
 
 		setSize();
-		moveCenter();
 
-		setUI();
+		moveCenter();
 		setVisible(true);
+
+		setSize();
+		moveCenter();
 
 		waitOfThread = 1000/FrameRate;
 		thread = new Thread(this);
@@ -294,10 +298,10 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				canvas.setSize(image.getWidth(), image.getHeight());
 			}
 			Dimension d = getPreferredSize();
-			int width = d.width;
-			if(420 > width)
-				width = 420;
-			setSize(width, 120 + d.height);
+			Insets is = getInsets();
+			int width = d.width + is.left + is.right;
+			int height = d.height + is.top + is.bottom;
+			setSize(width, height);
 			repaint();
 		}
 	}

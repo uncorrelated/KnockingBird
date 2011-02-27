@@ -72,16 +72,16 @@ public class SwingBufferedImage {
 				double frc = len / r;
 				if (1 > frc) {
 					double eff = 1 > frc ? Math.pow(1 - frc, coefficient) : 0;
-					double smx = eff * mx;
-					double smy = eff * my;
-					int cmx = (int) Math.floor(smx);
-					int cmy = (int) Math.floor(smy);
-					int sx1 = range(x + cmx, 0, w - 1);
-					int sy1 = range(y + cmy, 0, h - 1);
+					double ex = eff * mx;
+					double ey = eff * my;
+					int fx = (int) Math.floor(ex);
+					int fy = (int) Math.floor(ey);
+					int sx1 = range(x + fx, 0, w - 1);
+					int sy1 = range(y + fy, 0, h - 1);
 					int sx2 = range(sx1 + 1, 0, w - 1);
 					int sy2 = range(sy1 + 1, 0, h - 1);
-					double a = smx - cmx;
-					double b = smy - cmy;
+					double a = ex - fx;
+					double b = ey - fy;
 					bmd[ptr_dst] = mean(bms[sx1 + w * sy1], bms[sx1 + w * sy2],
 							bms[sx2 + w * sy1], bms[sx2 + w * sy2], a, b);
 				} else {
