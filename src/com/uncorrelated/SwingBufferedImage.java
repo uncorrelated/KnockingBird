@@ -42,6 +42,8 @@ public class SwingBufferedImage {
 			direction = 1;
 			decreaseCount();
 		}
+		if(0==deformation)
+			move();
 	}
 
 	private int range(int n, int min, int max) {
@@ -66,10 +68,8 @@ public class SwingBufferedImage {
 				double len = Math.sqrt(dx * dx + dy * dy);
 				double frc = len / r;
 				double eff = 1 > frc ? Math.sqrt(1 - frc) : 0;
-				if (eff < 0)
-					eff = 0;
-				int sx = range(x + (int) (eff * mx), 0, w - 1);
-				int sy = range(y + (int) (eff * my), 0, h - 1);
+				int sx = range(x + (int)Math.round(eff * mx), 0, w - 1);
+				int sy = range(y + (int)Math.round(eff * my), 0, h - 1);
 				int ptr_dst = x + w * y;
 				int ptr_src = sx + w * sy;
 				bmd[ptr_dst] = bms[ptr_dst];
@@ -81,8 +81,7 @@ public class SwingBufferedImage {
 	}
 
 	public BufferedImage transform(BufferedImage src) {
-		return transform(src, centerX, centerY, Radius, vectorX * deformation
-				/ span, vectorY * deformation / span);
+		return transform(src, centerX, centerY, Radius, vectorX * deformation / span, vectorY * deformation / span);
 	}
 
 	public int getCenterX() {

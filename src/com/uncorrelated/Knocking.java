@@ -362,7 +362,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			Image dbuf = createImage(image.getWidth(), image.getHeight());
 			Graphics gd = dbuf.getGraphics();
 			BufferedImage bi = image;
-			for (int c = 0; c < swingBI.length; c++)
+			for (int c = 0; c < numOfUse; c++)
 				bi = swingBI[c].transform(bi);
 			gd.drawImage(bi, 0, 0, this);
 			if (null != mpp && null != mmp) {
