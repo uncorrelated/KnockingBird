@@ -164,7 +164,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbl.setConstraints(jsls3, gbc4);
 		add(jsls3);
 		
-		JCheckBox jcb4 = new JCheckBox("減退", IsDecline);
+		JCheckBox jcb4 = new JCheckBox("揺れを減退", IsDecline);
 		jcb4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				IsDecline = ((JCheckBox)e.getSource()).isSelected();
@@ -181,7 +181,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbc6.gridx = 0;
 		gbc6.gridy = 4;
 		Container btns = new Container();
-		btns.setLayout(new GridLayout(1, 4));
+		btns.setLayout(new GridLayout(1, 2));
 		btns.add(jcb4);
 		JButton stop_b = new JButton("全停止");
 		stop_b.addActionListener(new ActionListener() {
@@ -193,6 +193,10 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbl.setConstraints(btns, gbc6);
 		add(btns);
 
+		Dimension d_btns = btns.getPreferredSize();
+		d_btns.width = 250;
+		btns.setPreferredSize(d_btns);
+		
 		pmenu = new JPopupMenu();
 		jmi = new JMenuItem[2];
 		int jmi_c = 0;
