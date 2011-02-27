@@ -197,11 +197,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		jmi = new JMenuItem[2];
 		int jmi_c = 0;
 		
-		pmenu.setPopupSize(112, 24*jmi.length);
-		jmi[jmi_c] = new JMenuItem();
-		jmi[jmi_c].setLayout(new GridLayout(1, 1));
-		JLabel jl_stop = new JLabel("マウス下の揺れを停止");
-		jmi[jmi_c].add(jl_stop);
+		jmi[jmi_c] = new JMenuItem("マウス下の揺れを停止");
 		jmi[jmi_c].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				canvas.stopSwing();
@@ -209,15 +205,15 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		});
 		pmenu.add(jmi[jmi_c++]);
 
-		jmi[jmi_c] = new JMenuItem();
-		jmi[jmi_c].setLayout(new GridLayout(1, 1));
-		jmi[jmi_c].add(new JLabel("ファイルを選択"));
+		jmi[jmi_c] = new JMenuItem("ファイルを選択");
 		jmi[jmi_c].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				openFileChooser();
 			}
 		});
 		pmenu.add(jmi[jmi_c++]);
+		Dimension d_jmi = jmi[0].getPreferredSize();
+		pmenu.setPopupSize(d_jmi.width, jmi.length*d_jmi.height);
 
 		setSize();
 
