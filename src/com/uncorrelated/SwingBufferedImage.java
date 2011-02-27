@@ -67,7 +67,7 @@ public class SwingBufferedImage {
 				int dy = y - cy;
 				double len = Math.sqrt(dx * dx + dy * dy);
 				double frc = len / r;
-				double eff = 1 > frc ? Math.sqrt(1 - frc) : 0;
+				double eff = 1 > frc ? 1 - frc : 0;
 				int sx = range(x + (int)Math.round(eff * mx), 0, w - 1);
 				int sy = range(y + (int)Math.round(eff * my), 0, h - 1);
 				int ptr_dst = x + w * y;
