@@ -11,6 +11,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.color.CMMException;
 import java.awt.datatransfer.DataFlavor;
@@ -79,7 +80,6 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		// http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/
 		setImage(this.getClass().getResource("3386409319_7ca53351e8.jpg"));
 		setResizable(false);
-		setLocationRelativeTo(null);
 		addWindowListener(this);
 
 		for (int c = 0; c < swingBI.length; c++)
@@ -244,6 +244,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 
 		HeightOfControl = 14*dm.height;
 		setSize();
+		moveCenter();
 
 		setUI();
 		setVisible(true);
@@ -251,6 +252,12 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		waitOfThread = 1000/DefaultFrameRate;
 		thread = new Thread(this);
 		thread.start();
+	}
+	
+	private void moveCenter(){
+		Rectangle screen = getGraphicsConfiguration().getBounds();
+		setLocation(screen.x + screen.width/2  - getSize().width/2,
+				screen.y + screen.height/2 - getSize().height/2);
 	}
 	
 	public double getCoefficient(){
@@ -285,13 +292,14 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				if(null!=swingBI[c])
 					swingBI[c].reset();
 			rescaleImage();
-			int width = image.getWidth() + 64;
-			if(420 > width)
-				width = 420;
-			setSize(width, image.getHeight() + HeightOfControl);
 			if (null != canvas) {
 				canvas.setSize(image.getWidth(), image.getHeight());
 			}
+			Dimension d = getPreferredSize();
+			int width = d.width;
+			if(420 > width)
+				width = 420;
+			setSize(width, 120 + d.height);
 			repaint();
 		}
 	}
