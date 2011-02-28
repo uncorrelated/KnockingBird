@@ -13,8 +13,8 @@
 
   <target name="compile">
     <mkdir dir="${dst}"/>
-    <copy todir="${dst}/com/uncorrelated" preservelastmodified="true">
-      <fileset dir="${src}/com/uncorrelated" includes="*.jpg"/>
+    <copy todir="${dst}/com/uncorrelated/kbird" preservelastmodified="true">
+      <fileset dir="${src}/com/uncorrelated/kbird" includes="*.jpg"/>
     </copy>
     <javac includeAntRuntime="true" debug="true" srcdir="${src}" destdir="${dst}" />
   </target>
