@@ -224,7 +224,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item1"));
 		jmi[jmi_c].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				canvas.stopSwing();
+				canvas.stopOval();
 			}
 		});
 		pmenu.add(jmi[jmi_c++]);
@@ -469,22 +469,6 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			g.setColor(color);
 			drawCircle(g, p.x, p.y, r1, r2);
 		}
-
-		public void stopSwing(){
-			for (int c = 0; c < swingBI.length; c++){
-				int dx = swingBI[c].getCenterX() - mmp.x;
-				int dy = swingBI[c].getCenterY() - mmp.y;
-				int r = swingBI[c].getRadius1();
-				if(r*r >= dx*dx + dy*dy){
-					swingBI[c].reset();
-					if(OvalNumber == c){
-						MouseStatus = 0;
-						MouseAcitivity = 0;
-						OvalNumber = -1;
-					}
-				}
-			}
-		}
 		
 		/*
 		 * 0: No Position  
@@ -623,15 +607,22 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 
 		public void suspendOval(){
-			if(3 == MouseStatus){
+			if(0 < MouseStatus){
 				swingBI[OvalNumber].setSuspend(true);
 				MouseClickedTime = 0;
 			}
 		}
 
 		public void resumeOval(){
-			if(3 == MouseStatus){
+			if(0 < MouseStatus){
 				swingBI[OvalNumber].setSuspend(false);
+				MouseClickedTime = 0;
+			}
+		}
+
+		public void stopOval(){
+			if(0 < MouseStatus){
+				swingBI[OvalNumber].reset();
 				MouseClickedTime = 0;
 			}
 		}
