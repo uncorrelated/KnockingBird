@@ -3,7 +3,7 @@ package com.uncorrelated.kbird;
 import java.awt.image.BufferedImage;
 
 public class SwingBufferedImage {
-	private volatile int centerX = 0, centerY = 0, Radius = 0, vectorX,
+	private volatile int centerX = 0, centerY = 0, Radius1 = 0, Radius2 = 0, vectorX,
 			vectorY, span = 1, deformation = 1, direction = 1, baseSpeed = 5,
 			power = 0;
 	private volatile double coefficient = 1;
@@ -56,7 +56,7 @@ public class SwingBufferedImage {
 		return n;
 	}
 
-	private BufferedImage transform(BufferedImage src, int cx, int cy, int r,
+	private BufferedImage transform(BufferedImage src, int cx, int cy, int r1, int r2,
 			int mx, int my, double coefficient) {
 		int w = src.getWidth();
 		int h = src.getHeight();
@@ -68,8 +68,7 @@ public class SwingBufferedImage {
 				int ptr_dst = x + w * y;
 				int dx = x - cx;
 				int dy = y - cy;
-				double len = Math.sqrt(dx * dx + dy * dy);
-				double frc = len / r;
+				double frc = (float)dx*dx/r1/r1 + (float)dy*dy/r2/r2;
 				if (1 > frc) {
 					double eff = 1 > frc ? Math.pow(1 - frc, coefficient) : 0;
 					double ex = eff * mx;
@@ -111,9 +110,9 @@ public class SwingBufferedImage {
 	}
 
 	public BufferedImage transform(BufferedImage src) {
-		if (0 >= Radius)
+		if (0 >= Radius1)
 			return src;
-		return transform(src, centerX, centerY, Radius, vectorX * deformation
+		return transform(src, centerX, centerY, Radius1, Radius2, vectorX * deformation
 				/ span, vectorY * deformation / span, coefficient);
 	}
 
@@ -133,12 +132,17 @@ public class SwingBufferedImage {
 		this.centerY = centerY;
 	}
 
-	public int getRadius() {
-		return Radius;
+	public void setRadius(int r1, int r2) {
+		Radius1 = r1;
+		Radius2 = r2;
 	}
 
-	public void setRadius(int radius) {
-		Radius = radius;
+	public int getRadius1() {
+		return Radius1;
+	}
+
+	public int getRadius2() {
+		return Radius2;
 	}
 
 	public int getVectorX() {
@@ -157,7 +161,8 @@ public class SwingBufferedImage {
 	public void reset() {
 		vectorX = 0;
 		vectorY = 0;
-		Radius = 0;
+		Radius1 = 0;
+		Radius2 = 0;
 		deformation = 0;
 		count = 0;
 	}
