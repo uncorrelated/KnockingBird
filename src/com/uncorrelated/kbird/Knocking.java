@@ -80,12 +80,13 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private volatile boolean flag = true;
 	private ResourceBundle rb = ResourceBundle.getBundle("com.uncorrelated.kbird.Knocking");
 
-	public Knocking() throws IOException {
+	public Knocking(String fname) throws IOException {
 		super("Knocking Bird");
 		setUI();
-		
+
 		// http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/
-		setImage(this.getClass().getResource("3386409319_7ca53351e8.jpg"));
+		initImage(fname, this.getClass().getResource("3386409319_7ca53351e8.jpg"));
+
 		setResizable(false);
 		addWindowListener(this);
 
@@ -357,6 +358,23 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		setSize();
 	}
 
+	private void initImage(String fname, URL url) throws IOException {
+		if(null!=fname){
+			try{
+				FileInputStream fis = new FileInputStream(fname);
+				image = ImageIO.read(fis);
+				fis.close();
+			} catch(IOException ex) {
+				fname = null;
+			}
+		}
+		if(null == fname){
+			image = ImageIO.read(url);
+			if(null!=canvas)
+				canvas.showMessage();
+		}
+	}
+
 	private void openFileChooser(){
 		JFileChooser fc = new JFileChooser();
 	    fc.setFileFilter(new FileFilter(){
@@ -513,7 +531,6 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				synchronized(swingBI){
 					SwingBufferedImage sbi = swingBI[OvalNumber];
 					int cx = sbi.getCenterX();
-					int cy = sbi.getCenterY();
 					int nr1 = 0, nr2 = 0;
 					int dx = cx - mmp.x;
 					nr1 = Math.abs(dx);
@@ -524,7 +541,6 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			case 2:
 				synchronized(swingBI){
 					SwingBufferedImage sbi = swingBI[OvalNumber];
-					int cx = sbi.getCenterX();
 					int cy = sbi.getCenterY();
 					int nr1 = 0, nr2 = 0;
 					int dy = cy - mmp.y;
@@ -809,6 +825,6 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Knocking bubble = new Knocking();
+		Knocking bubble = new Knocking(args.length < 1 ? null : args[0]);
 	}
 }
