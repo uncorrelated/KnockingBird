@@ -205,14 +205,6 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		jmi = new JMenuItem[4];
 		int jmi_c = 0;
 		
-		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item1"));
-		jmi[jmi_c].addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				canvas.stopSwing();
-			}
-		});
-		pmenu.add(jmi[jmi_c++]);
-		
 		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item3"));
 		jmi[jmi_c].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -225,6 +217,14 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		jmi[jmi_c].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				canvas.resumeOval();
+			}
+		});
+		pmenu.add(jmi[jmi_c++]);
+
+		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item1"));
+		jmi[jmi_c].addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				canvas.stopSwing();
 			}
 		});
 		pmenu.add(jmi[jmi_c++]);
