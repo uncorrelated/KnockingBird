@@ -5,7 +5,10 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -287,6 +290,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			fis = new FileInputStream(file);
 			image = ImageIO.read(fis);
 			fis.close();
+			canvas.showMessage();
 			setSize();
 		} catch (CMMException e) {
 			JOptionPane.showMessageDialog(this ,"このファイルのカラーコードには対応していません:\n" + e.getMessage(),"CMMException" ,JOptionPane.INFORMATION_MESSAGE);
@@ -299,6 +303,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 
 	private void setImage(URL url) throws IOException {
 		image = ImageIO.read(url);
+		if(null!=canvas)
+			canvas.showMessage();
 		setSize();
 	}
 
@@ -370,12 +376,12 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		private boolean IsMeasureFrameRate = false;
 		private int nof = 0, sec = (int)System.currentTimeMillis()/1000;
 		private int mouse_x, mouse_y;
+		private boolean IsMessage = true;
 
 		public ImgCanvas() {
 			addMouseListener(this);
 			addMouseMotionListener(this);
 		}
-
 	
 		public void paint(Graphics g) {
 			Image dbuf = createImage(image.getWidth(), image.getHeight());
@@ -394,6 +400,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				gd.drawLine(mpp.x, mpp.y, mmp.x, mmp.y);
 			}
 			drawSwingCircle(gd);
+			if(IsMessage)
+				showMessage(gd, "マウスで揺らす範囲を指定してください");
 			g.drawImage(dbuf, 0, 0, this);
 			if(IsMeasureFrameRate){
 				nof++;
@@ -407,6 +415,22 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			}
 		}
 
+		Font font = new Font("Serif", Font.PLAIN, 16);
+		Color bgColor = new Color(0F, 0F, 0F, 0.5F);
+		private void showMessage(Graphics g, String msg){
+			FontMetrics fm = g.getFontMetrics(font);
+			int height = fm.getHeight();
+			int width = fm.stringWidth(msg);
+			Dimension d = getSize();
+			g.setColor(Color.black);
+			int padding = 10;
+			g.setColor(bgColor);
+			g.fillRoundRect((d.width - width - padding)/2, d.height/2 - height - padding, width + padding, height + padding, padding, padding);
+			g.setFont(font);
+			g.setColor(Color.yellow);
+			g.drawString(msg, (d.width - width)/2, (d.height - height)/2);
+		}
+		
 		private int length(Point p1, Point p2) {
 			int dx = p1.x - p2.x;
 			int dy = p1.y - p2.y;
@@ -463,6 +487,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 
 		public void mousePressed(MouseEvent arg0) {
+			IsMessage = false;
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mpp = arg0.getPoint();
 			} else if (arg0.isPopupTrigger()) {
@@ -561,6 +586,10 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 
 		public void dropActionChanged(DropTargetDragEvent arg0) {
+		}
+
+		public void showMessage(){
+			IsMessage = true;
 		}
 	}
 
