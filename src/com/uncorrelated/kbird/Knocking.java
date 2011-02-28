@@ -62,6 +62,8 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileFilter;
 
 public class Knocking extends JFrame implements WindowListener, Runnable {
@@ -202,6 +204,31 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		btns.setPreferredSize(d_btns);
 		
 		pmenu = new JPopupMenu();
+		pmenu.addPopupMenuListener(new PopupMenuListener() {
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+				int n = canvas.getOvalNumber();
+				if(n<0){
+					for(int c=0;c<3;c++)
+						jmi[c].setEnabled(false);
+					return;
+				}
+				SwingBufferedImage sbi = swingBI[n];
+				jmi[2].setEnabled(true);
+				if(sbi.isSuspend()){
+					jmi[0].setEnabled(false);
+					jmi[1].setEnabled(true);
+				} else {
+					jmi[0].setEnabled(true);
+					jmi[1].setEnabled(false);
+				}
+			}
+			
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+			}
+			
+			public void popupMenuCanceled(PopupMenuEvent e) {
+			}
+		});
 		jmi = new JMenuItem[4];
 		int jmi_c = 0;
 		
@@ -626,7 +653,13 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				MouseClickedTime = 0;
 			}
 		}
-		
+
+		public int getOvalNumber(){
+			if(0 >= MouseStatus)
+				return -1;
+			return OvalNumber;
+		}
+
 		public void mouseReleased(MouseEvent arg0) {
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mrp = arg0.getPoint();
