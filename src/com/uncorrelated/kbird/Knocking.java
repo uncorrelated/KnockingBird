@@ -390,7 +390,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			for (int c = 0; c < swingBI.length; c++)
 				bi = swingBI[c].transform(bi);
 			gd.drawImage(bi, 0, 0, this);
-			if (null != mpp && null != mmp && 0==OnCircleResizing) {
+			if (null != mpp && null != mmp && !OnCircleResizing) {
 				int radius = length(mpp, mmp);
 				drawBoldCircle(gd, mpp, radius, radius, Color.yellow);
 				gd.setColor(Color.black);
@@ -456,21 +456,28 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				int r = swingBI[c].getRadius1();
 				if(r*r >= dx*dx + dy*dy){
 					swingBI[c].reset();
+					if(OnCircleNumber == c){
+						OnCircleNumber = -1;
+						OnCircleResizingType = 0;
+						OnCircleResizing = false;
+						OnCircleBorder = false;
+					}
 				}
 			}
 		}
 		
 		private boolean OnCircleBorder = false;
-		private int OnCircleResizing = 0;
+		private boolean OnCircleResizing = false;
+		private int OnCircleResizingType = 0;
 		private int OnCircleNumber = -1;
 		public void drawSwingCircle(Graphics g){
-			if(0 < OnCircleResizing){
+			if(OnCircleResizing){
 				synchronized(swingBI){
 					SwingBufferedImage sbi = swingBI[OnCircleNumber];
 					int cx = sbi.getCenterX();
 					int cy = sbi.getCenterY();
 					int nr1 = 0, nr2 = 0;
-					switch(OnCircleResizing){
+					switch(OnCircleResizingType){
 					case 1:
 						int dx = cx - mmp.x;
 						nr1 = Math.abs(dx);
@@ -498,16 +505,32 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 					continue;
 				float borderWidth = (float)10 / r;
 				float distance = distance(cx, cy, r1, r2, mmp.x, mmp.y);
-				if(distance < 1 || ptr == OnCircleNumber){
+				if(distance < 1){
 					drawBoldCircle(g, new Point(cx, cy), r1, r2, Color.pink);
 					if((1 - borderWidth) <= distance){
 						OnCircleBorder = true;
-						if(0 == OnCircleResizing)
+						if(!OnCircleResizing)
 							OnCircleNumber = ptr;
+						int d1 = Math.abs(cx - mmp.x);
+						int d2 = Math.abs(cy - mmp.y);
+						OnCircleResizingType = d1 > d2 ? 1 : 2;
 					}
+				} else if(OnCircleResizing){
+					drawBoldCircle(g, new Point(cx, cy), r1, r2, Color.pink);
 				}
 			}
-			setCursor(Cursor.getPredefinedCursor(OnCircleBorder ? Cursor.HAND_CURSOR : Cursor.DEFAULT_CURSOR));
+			int ctype = Cursor.DEFAULT_CURSOR;
+			if(OnCircleBorder){
+				switch(OnCircleResizingType){
+				case 1:
+					ctype = Cursor.E_RESIZE_CURSOR;
+					break;
+				case 2:
+					ctype = Cursor.S_RESIZE_CURSOR;
+					break;
+				}
+			}
+			setCursor(Cursor.getPredefinedCursor(ctype));
 		}
 
 		private float distance(int cx, int cy, int r1, int r2, int x, int y){
@@ -534,14 +557,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			IsMessage = false;
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mpp = arg0.getPoint();
-				if(OnCircleBorder){
-					SwingBufferedImage sbi = swingBI[OnCircleNumber];
-					int cx = sbi.getCenterX();
-					int cy = sbi.getCenterY();
-					int r1 = Math.abs(cx - mpp.x);
-					int r2 = Math.abs(cy - mpp.y);
-					OnCircleResizing = r1 > r2 ? 1 : 2;
-				}
+				if(1<=OnCircleResizingType)
+					OnCircleResizing = true;
 			} else if (arg0.isPopupTrigger()) {
 				pmenu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
 			}
@@ -550,7 +567,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		public void mouseReleased(MouseEvent arg0) {
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mrp = arg0.getPoint();
-				if(0 == OnCircleResizing){
+				if(!OnCircleResizing){
 					synchronized(swingBI){
 						cptr = cptr % swingBI.length;
 						swingBI[cptr].setCenterX(mpp.x);
@@ -568,7 +585,9 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 						cptr = (cptr + 1) % swingBI.length;
 					}
 				}
-				OnCircleResizing = 0;
+				OnCircleResizing = false;
+				OnCircleResizingType = 0;
+				OnCircleBorder = false;
 				OnCircleNumber = -1;
 				mrp = mpp = null;
 			} else if (arg0.isPopupTrigger()) {
