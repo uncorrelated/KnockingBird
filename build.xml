@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="KnockingBird" default="jar" basedir=".">
+  <property name="src" value="src"/>
+  <property name="dst" value="bin"/>
+  <property name="manifest" value="META-INF/MANIFEST.MF"/>
+  <property name="project" value="KnockingBird"/>
+  <property name="version" value="0.9"/>
+  <property name="jar" value="${project}-${version}.jar"/>
+
+  <target name="jar" depends="compile">
+    <jar jarfile="${jar}" basedir="${dst}" manifest="${manifest}"></jar>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${dst}"/>
+    <copy todir="${dst}/com/uncorrelated" preservelastmodified="true">
+      <fileset dir="${src}/com/uncorrelated" includes="*.jpg"/>
+    </copy>
+    <javac includeAntRuntime="true" debug="true" srcdir="${src}" destdir="${dst}" />
+  </target>
+
+  <target name="clean">
+    <delete dir="${dst}" />
+  </target>
+</project>
