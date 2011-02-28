@@ -1,4 +1,4 @@
-package com.uncorrelated;
+package com.uncorrelated.kbird;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -415,7 +415,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			}
 		}
 
-		Font font = new Font("Serif", Font.PLAIN, 16);
+		Font font = new Font("MS UI GOTHIC", Font.PLAIN, 16);
 		Color bgColor = new Color(0F, 0F, 0F, 0.5F);
 		private void showMessage(Graphics g, String msg){
 			FontMetrics fm = g.getFontMetrics(font);

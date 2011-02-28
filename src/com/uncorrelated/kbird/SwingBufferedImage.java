@@ -1,4 +1,4 @@
-package com.uncorrelated;
+package com.uncorrelated.kbird;
 
 import java.awt.image.BufferedImage;
 
