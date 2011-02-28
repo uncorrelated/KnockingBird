@@ -16,6 +16,7 @@
     <copy todir="${dst}/com/uncorrelated" preservelastmodified="true">
       <fileset dir="${src}/com/uncorrelated" includes="*.jpg"/>
     </copy>
+  	<native2ascii src="${src}/com/uncorrelated" dest="${dst}/com/uncorrelated" includes="*.properties"/>
     <javac includeAntRuntime="true" debug="true" srcdir="${src}" destdir="${dst}" />
   </target>
 
