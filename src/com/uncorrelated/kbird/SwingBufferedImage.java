@@ -8,7 +8,7 @@ public class SwingBufferedImage {
 			power = 0;
 	private volatile double coefficient = 1;
 	private volatile int count = 0, baseCount = 1;
-	private volatile boolean IsDecline = true;
+	private volatile boolean IsDecline = true, IsSuspend = false;
 
 	private int speed() {
 		int speed = (int) (span * decline() * baseSpeed / 100);
@@ -24,13 +24,15 @@ public class SwingBufferedImage {
 
 	public void decreaseCount() {
 		if (IsDecline && 0 < count) {
-			if (0 == --count)
+			if (0 == --count){
 				deformation = 0;
+				reset();
+			}
 		}
 	}
 
 	public void move() {
-		if (0 >= count) {
+		if (0 >= count || IsSuspend) {
 			return;
 		}
 		float decline = decline();
@@ -222,5 +224,16 @@ public class SwingBufferedImage {
 
 	public void setCoefficient(double coefficient) {
 		this.coefficient = coefficient;
+	}
+
+	public boolean isSuspend() {
+		return IsSuspend;
+	}
+
+	public void setSuspend(boolean f) {
+		IsSuspend = f;
+	}
+	public boolean toggleSuspend() {
+		return IsSuspend = !IsSuspend;
 	}
 }

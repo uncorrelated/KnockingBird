@@ -202,13 +202,29 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		btns.setPreferredSize(d_btns);
 		
 		pmenu = new JPopupMenu();
-		jmi = new JMenuItem[2];
+		jmi = new JMenuItem[4];
 		int jmi_c = 0;
 		
 		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item1"));
 		jmi[jmi_c].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				canvas.stopSwing();
+			}
+		});
+		pmenu.add(jmi[jmi_c++]);
+		
+		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item3"));
+		jmi[jmi_c].addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				canvas.suspendOval();
+			}
+		});
+		pmenu.add(jmi[jmi_c++]);
+		
+		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item4"));
+		jmi[jmi_c].addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				canvas.resumeOval();
 			}
 		});
 		pmenu.add(jmi[jmi_c++]);
@@ -221,6 +237,11 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		});
 		pmenu.add(jmi[jmi_c++]);
 		Dimension d_jmi = jmi[0].getPreferredSize();
+		for(int c=0;c<jmi.length;c++){
+			Dimension d_jmi_t = jmi[c].getPreferredSize();
+			if(d_jmi_t.width > d_jmi.width)
+				d_jmi = d_jmi_t;
+		}
 		pmenu.setPopupSize(d_jmi.width, jmi.length*d_jmi.height);
 
 		setSize();
@@ -473,6 +494,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		 */
 		private int MouseStatus = 0;
 		private int MouseAcitivity = 0;
+		private long MouseClickedTime = 0;
 		private int OvalNumber = 0;
 		public void drawSwingCircle(Graphics g){
 			switch(MouseAcitivity){
@@ -582,11 +604,38 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mpp = arg0.getPoint();
 				MouseAcitivity = MouseStatus;
+				toggleOval();
 			} else if (arg0.isPopupTrigger()) {
 				pmenu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
 			}
 		}
 
+		private void toggleOval(){
+			if(3 == MouseStatus){
+				// 移動領域で1秒以内に2回クリック
+				long ctime = System.currentTimeMillis();
+				if(ctime - MouseClickedTime < 1000){
+					swingBI[OvalNumber].toggleSuspend();
+					MouseClickedTime = 0;
+				} else
+					MouseClickedTime = ctime;
+			}
+		}
+
+		public void suspendOval(){
+			if(3 == MouseStatus){
+				swingBI[OvalNumber].setSuspend(true);
+				MouseClickedTime = System.currentTimeMillis();
+			}
+		}
+
+		public void resumeOval(){
+			if(3 == MouseStatus){
+				swingBI[OvalNumber].setSuspend(false);
+				MouseClickedTime = System.currentTimeMillis();
+			}
+		}
+		
 		public void mouseReleased(MouseEvent arg0) {
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mrp = arg0.getPoint();
