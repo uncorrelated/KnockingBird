@@ -198,7 +198,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		add(btns);
 
 		Dimension d_btns = btns.getPreferredSize();
-		d_btns.width = 250;
+		d_btns.width = 300;
 		btns.setPreferredSize(d_btns);
 		
 		pmenu = new JPopupMenu();
