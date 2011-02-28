@@ -6,7 +6,7 @@
   <property name="dst_res" value="bin/com/uncorrelated/kbird"/>
   <property name="manifest" value="META-INF/MANIFEST.MF"/>
   <property name="project" value="KnockingBird"/>
-  <property name="version" value="0.9"/>
+  <property name="version" value="0.91"/>
   <property name="jar" value="${project}-${version}.jar"/>
 
   <target name="jar" depends="compile">

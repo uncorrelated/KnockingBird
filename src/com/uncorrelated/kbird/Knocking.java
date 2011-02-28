@@ -390,7 +390,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			for (int c = 0; c < swingBI.length; c++)
 				bi = swingBI[c].transform(bi);
 			gd.drawImage(bi, 0, 0, this);
-			if (null != mpp && null != mmp && !OnCircleResizing) {
+			if (null != mpp && null != mmp && 0==MouseAcitivity) {
 				int radius = length(mpp, mmp);
 				drawBoldCircle(gd, mpp, radius, radius, Color.yellow);
 				gd.setColor(Color.black);
@@ -456,43 +456,64 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				int r = swingBI[c].getRadius1();
 				if(r*r >= dx*dx + dy*dy){
 					swingBI[c].reset();
-					if(OnCircleNumber == c){
-						OnCircleNumber = -1;
-						OnCircleResizingType = 0;
-						OnCircleResizing = false;
-						OnCircleBorder = false;
+					if(OvalNumber == c){
+						MouseStatus = 0;
+						MouseAcitivity = 0;
+						OvalNumber = -1;
 					}
 				}
 			}
 		}
 		
-		private boolean OnCircleBorder = false;
-		private boolean OnCircleResizing = false;
-		private int OnCircleResizingType = 0;
-		private int OnCircleNumber = -1;
+		/*
+		 * 0: No Position  
+		 * 1: Border/Resize(South)
+		 * 2: Border/Resize(East)
+		 * 3: Move
+		 */
+		private int MouseStatus = 0;
+		private int MouseAcitivity = 0;
+		private int OvalNumber = 0;
 		public void drawSwingCircle(Graphics g){
-			if(OnCircleResizing){
+			switch(MouseAcitivity){
+			case 1:
 				synchronized(swingBI){
-					SwingBufferedImage sbi = swingBI[OnCircleNumber];
+					SwingBufferedImage sbi = swingBI[OvalNumber];
 					int cx = sbi.getCenterX();
 					int cy = sbi.getCenterY();
 					int nr1 = 0, nr2 = 0;
-					switch(OnCircleResizingType){
-					case 1:
-						int dx = cx - mmp.x;
-						nr1 = Math.abs(dx);
-						nr2 = sbi.getRadius2();
-						break;
-					case 2:
-						int dy = cy - mmp.y;
-						nr1 = sbi.getRadius1();
-						nr2 = Math.abs(dy);
-						break;
-					}
+					int dx = cx - mmp.x;
+					nr1 = Math.abs(dx);
+					nr2 = sbi.getRadius2();
 					sbi.setRadius(nr1, nr2);
 				}
+				break;
+			case 2:
+				synchronized(swingBI){
+					SwingBufferedImage sbi = swingBI[OvalNumber];
+					int cx = sbi.getCenterX();
+					int cy = sbi.getCenterY();
+					int nr1 = 0, nr2 = 0;
+					int dy = cy - mmp.y;
+					nr1 = sbi.getRadius1();
+					nr2 = Math.abs(dy);
+					sbi.setRadius(nr1, nr2);
+				}
+				break;
+			case 3:
+				synchronized(swingBI){
+					SwingBufferedImage sbi = swingBI[OvalNumber];
+					int cx = sbi.getCenterX();
+					int cy = sbi.getCenterY();
+					int dx = mmp.x - mpp.x;
+					int dy = mmp.y - mpp.y;
+					mpp = mmp;
+					sbi.setCenterX(cx + dx);
+					sbi.setCenterY(cy + dy);
+				}
+				break;
 			}
-			OnCircleBorder = false;
+			MouseStatus = 0;
 			for (int c = 0; c < swingBI.length; c++){
 				int ptr = (cptr + c) % swingBI.length;
 				SwingBufferedImage sbi = swingBI[ptr];
@@ -508,27 +529,30 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				if(distance < 1){
 					drawBoldCircle(g, new Point(cx, cy), r1, r2, Color.pink);
 					if((1 - borderWidth) <= distance){
-						OnCircleBorder = true;
-						if(!OnCircleResizing)
-							OnCircleNumber = ptr;
 						int d1 = Math.abs(cx - mmp.x);
 						int d2 = Math.abs(cy - mmp.y);
-						OnCircleResizingType = d1 > d2 ? 1 : 2;
+						MouseStatus = d1 > d2 ? 1 : 2;
+						if(0 == MouseAcitivity)
+							OvalNumber = ptr;
+					} else if(0 == MouseAcitivity){
+						MouseStatus = 3;
+						OvalNumber = ptr;
 					}
-				} else if(OnCircleResizing){
+				} else if(0<MouseAcitivity){
 					drawBoldCircle(g, new Point(cx, cy), r1, r2, Color.pink);
 				}
 			}
 			int ctype = Cursor.DEFAULT_CURSOR;
-			if(OnCircleBorder){
-				switch(OnCircleResizingType){
-				case 1:
-					ctype = Cursor.E_RESIZE_CURSOR;
-					break;
-				case 2:
-					ctype = Cursor.S_RESIZE_CURSOR;
-					break;
-				}
+			switch(0<MouseAcitivity ? MouseAcitivity : MouseStatus){
+			case 1:
+				ctype = Cursor.E_RESIZE_CURSOR;
+				break;
+			case 2:
+				ctype = Cursor.S_RESIZE_CURSOR;
+				break;
+			case 3:
+				ctype = Cursor.MOVE_CURSOR;
+				break;
 			}
 			setCursor(Cursor.getPredefinedCursor(ctype));
 		}
@@ -557,8 +581,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			IsMessage = false;
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mpp = arg0.getPoint();
-				if(1<=OnCircleResizingType)
-					OnCircleResizing = true;
+				MouseAcitivity = MouseStatus;
 			} else if (arg0.isPopupTrigger()) {
 				pmenu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
 			}
@@ -567,7 +590,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		public void mouseReleased(MouseEvent arg0) {
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mrp = arg0.getPoint();
-				if(!OnCircleResizing){
+				if(0==MouseAcitivity){
 					synchronized(swingBI){
 						cptr = cptr % swingBI.length;
 						swingBI[cptr].setCenterX(mpp.x);
@@ -585,10 +608,9 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 						cptr = (cptr + 1) % swingBI.length;
 					}
 				}
-				OnCircleResizing = false;
-				OnCircleResizingType = 0;
-				OnCircleBorder = false;
-				OnCircleNumber = -1;
+				MouseStatus = 0;
+				MouseAcitivity = 0;
+				OvalNumber = -1;
 				mrp = mpp = null;
 			} else if (arg0.isPopupTrigger()) {
 				pmenu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
