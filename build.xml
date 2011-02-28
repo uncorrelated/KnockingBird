@@ -2,6 +2,8 @@
 <project name="KnockingBird" default="jar" basedir=".">
   <property name="src" value="src"/>
   <property name="dst" value="bin"/>
+  <property name="src_res" value="src/com/uncorrelated/kbird"/>
+  <property name="dst_res" value="bin/com/uncorrelated/kbird"/>
   <property name="manifest" value="META-INF/MANIFEST.MF"/>
   <property name="project" value="KnockingBird"/>
   <property name="version" value="0.9"/>
@@ -13,9 +15,10 @@
 
   <target name="compile">
     <mkdir dir="${dst}"/>
-    <copy todir="${dst}/com/uncorrelated/kbird" preservelastmodified="true">
-      <fileset dir="${src}/com/uncorrelated/kbird" includes="*.jpg"/>
+    <copy todir="${dst_res}" preservelastmodified="true">
+      <fileset dir="${src_res}" includes="*.jpg"/>
     </copy>
+  	<native2ascii src="${src_res}" dest="${dst_res}" includes="*.properties"/>
     <javac includeAntRuntime="true" debug="true" srcdir="${src}" destdir="${dst}" />
   </target>
 

@@ -8,7 +8,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -44,10 +43,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -56,7 +55,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -77,10 +75,12 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private Thread thread = null;
 	private volatile long waitOfThread;
 	private volatile boolean flag = true;
+	private ResourceBundle rb = ResourceBundle.getBundle("com.uncorrelated.kbird.Knocking");
 
 	public Knocking() throws IOException {
 		super("Knocking Bird");
 		setUI();
+		
 		// http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/
 		setImage(this.getClass().getResource("3386409319_7ca53351e8.jpg"));
 		setResizable(false);
@@ -106,7 +106,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		Container jsls1 = new Container();
 		jsls1.setLayout(new FlowLayout());
 		Dimension dm = new Dimension(96, 16);
-		JLabel jl1 = new JLabel("揺れの大きさ");
+		JLabel jl1 = new JLabel(rb.getString("param1"));
 		jl1.setPreferredSize(dm);
 		jsls1.add(jl1);
 		jsls1.add(jsl1 = new JSlider(10, 50, 20));
@@ -128,7 +128,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbc3.gridy = 2;
 		Container jsls2 = new Container();
 		jsls2.setLayout(new FlowLayout());
-		JLabel jl2 = new JLabel("揺れの速さ");
+		JLabel jl2 = new JLabel(rb.getString("param2"));
 		jl2.setPreferredSize(dm);
 		jsls2.add(jl2);
 		jsls2.add(jsl2 = new JSlider(1, 100, 25));
@@ -150,7 +150,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbc4.gridy = 3;
 		Container jsls3 = new Container();
 		jsls3.setLayout(new FlowLayout());
-		JLabel jl3 = new JLabel("湾曲部の丸み");
+		JLabel jl3 = new JLabel(rb.getString("param3"));
 		jl3.setPreferredSize(dm);
 		jsls3.add(jl3);
 		jsls3.add(jsl3 = new JSlider(50, 150, 100));
@@ -167,7 +167,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		gbl.setConstraints(jsls3, gbc4);
 		add(jsls3);
 		
-		JCheckBox jcb4 = new JCheckBox("揺れを減退", IsDecline);
+		JCheckBox jcb4 = new JCheckBox(rb.getString("param4"), IsDecline);
 		jcb4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				IsDecline = ((JCheckBox)e.getSource()).isSelected();
@@ -186,7 +186,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		Container btns = new Container();
 		btns.setLayout(new GridLayout(1, 2));
 		btns.add(jcb4);
-		JButton stop_b = new JButton("全停止");
+		JButton stop_b = new JButton(rb.getString("button1"));
 		stop_b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				stopAllSwing();
@@ -204,7 +204,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		jmi = new JMenuItem[2];
 		int jmi_c = 0;
 		
-		jmi[jmi_c] = new JMenuItem("マウス下の揺れを停止");
+		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item1"));
 		jmi[jmi_c].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				canvas.stopSwing();
@@ -212,7 +212,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		});
 		pmenu.add(jmi[jmi_c++]);
 
-		jmi[jmi_c] = new JMenuItem("ファイルを選択");
+		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item2"));
 		jmi[jmi_c].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				openFileChooser();
@@ -293,11 +293,11 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			canvas.showMessage();
 			setSize();
 		} catch (CMMException e) {
-			JOptionPane.showMessageDialog(this ,"このファイルのカラーコードには対応していません:\n" + e.getMessage(),"CMMException" ,JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(this ,e.getMessage(),"CMMException" ,JOptionPane.INFORMATION_MESSAGE);
 		} catch (FileNotFoundException e) {
-			JOptionPane.showMessageDialog(this ,"ファイルが見つかりません:\n" + e.getMessage(),"FileNotFoundException" ,JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(this ,e.getMessage(),"FileNotFoundException" ,JOptionPane.INFORMATION_MESSAGE);
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(this ,"I/Oエラーです:\n" + e.getMessage(),"IOException" ,JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(this ,e.getMessage(),"IOException" ,JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
@@ -401,7 +401,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			}
 			drawSwingCircle(gd);
 			if(IsMessage)
-				showMessage(gd, "マウスで揺らす範囲を指定してください");
+				showMessage(gd, rb.getString("message01"));
 			g.drawImage(dbuf, 0, 0, this);
 			if(IsMeasureFrameRate){
 				nof++;
