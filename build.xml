@@ -6,7 +6,7 @@
   <property name="dst_res" value="bin/com/uncorrelated/kbird"/>
   <property name="manifest" value="META-INF/MANIFEST.MF"/>
   <property name="project" value="KnockingBird"/>
-  <property name="version" value="0.92"/>
+  <property name="version" value="0.93"/>
   <property name="jar" value="${project}-${version}.jar"/>
 
   <target name="jar" depends="compile">
@@ -24,5 +24,6 @@
 
   <target name="clean">
     <delete dir="${dst}" />
+    <delete file="${jar}" />
   </target>
 </project>
