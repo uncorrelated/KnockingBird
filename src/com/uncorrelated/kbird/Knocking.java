@@ -625,14 +625,14 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		public void suspendOval(){
 			if(3 == MouseStatus){
 				swingBI[OvalNumber].setSuspend(true);
-				MouseClickedTime = System.currentTimeMillis();
+				MouseClickedTime = 0;
 			}
 		}
 
 		public void resumeOval(){
 			if(3 == MouseStatus){
 				swingBI[OvalNumber].setSuspend(false);
-				MouseClickedTime = System.currentTimeMillis();
+				MouseClickedTime = 0;
 			}
 		}
 		
