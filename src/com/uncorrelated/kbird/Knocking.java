@@ -82,18 +82,13 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private int MaximumImageSize = 480;
 	private int MaximumIconSize = 128;
 	private int DoubleClickInterval = 1000;
-
-	private int parseInt(String value, int d){
-		try {
-			return Integer.parseInt(value);
-		} catch (NumberFormatException e){
-			return d;
-		}
-	}
+	private static volatile int NumberOfRestWindow = 0;
 	
 	public Knocking(String fname) throws IOException {
 		super("Knocking Bird");
 		setUI();
+
+		NumberOfRestWindow++;
 
 		initImage(fname, this.getClass().getResource(rb.getString("default_image")));
 		MaximumImageSize = parseInt(rb.getString("maximum_image_size"), MaximumImageSize);
@@ -297,6 +292,14 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		waitOfThread = 1000/FrameRate;
 		thread = new Thread(this);
 		thread.start();
+	}
+
+	private int parseInt(String value, int d){
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e){
+			return d;
+		}
 	}
 	
 	private void moveCenter(){
@@ -832,7 +835,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
-		System.exit(0);
+		if(0 == --NumberOfRestWindow)
+			System.exit(0);
 	}
 
 	public void windowClosed(WindowEvent e) {
