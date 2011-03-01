@@ -48,6 +48,7 @@ import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
+import javax.print.attribute.standard.NumberUpSupported;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -79,13 +80,26 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private volatile long waitOfThread;
 	private volatile boolean flag = true;
 	private ResourceBundle rb = ResourceBundle.getBundle("com.uncorrelated.kbird.Knocking");
+	private int MaximumImageSize = 480;
+	private int MaximumIconSize = 128;
+	private int DoubleClickInterval = 1000;
 
+	private int parseInt(String value, int d){
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e){
+			return d;
+		}
+	}
+	
 	public Knocking(String fname) throws IOException {
 		super("Knocking Bird");
 		setUI();
 
-		// http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/
-		initImage(fname, this.getClass().getResource("3386409319_7ca53351e8.jpg"));
+		initImage(fname, this.getClass().getResource(rb.getString("default_image")));
+		MaximumImageSize = parseInt(rb.getString("maximum_image_size"), MaximumImageSize);
+		MaximumIconSize = parseInt(rb.getString("maximum_icon_size"), MaximumIconSize);
+		DoubleClickInterval = parseInt(rb.getString("double_click_interval"), DoubleClickInterval);
 
 		setResizable(false);
 		addWindowListener(this);
@@ -321,8 +335,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			for (int c = 0; c < swingBI.length; c++)
 				if(null!=swingBI[c])
 					swingBI[c].reset();
-			image = rescaleImage(image, 480);
-			Image icon = rescaleImage(image, 128);
+			image = rescaleImage(image, MaximumImageSize);
+			Image icon = rescaleImage(image, MaximumIconSize);
 			setIconImage(icon);
 			if (null != canvas) {
 				canvas.setSize(image.getWidth(), image.getHeight());
@@ -642,7 +656,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			if(3 == MouseStatus){
 				// 移動領域で1秒以内に2回クリック
 				long ctime = System.currentTimeMillis();
-				if(ctime - MouseClickedTime < 1000){
+				if(ctime - MouseClickedTime < DoubleClickInterval){
 					swingBI[OvalNumber].toggleSuspend();
 					MouseClickedTime = 0;
 				} else
