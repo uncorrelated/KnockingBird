@@ -355,7 +355,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		moveCenter();
 
 		int number_of_core = Runtime.getRuntime().availableProcessors();
-		rbuf = new Task[2 * number_of_core];
+		rbuf = new Task[2 + number_of_core];
 		tsem.release(rbuf.length);
 
 		cthread = new Thread(new Calcurator());
