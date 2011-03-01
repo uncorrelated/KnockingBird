@@ -100,6 +100,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		MaximumImageSize = parseInt(rb.getString("maximum_image_size"), MaximumImageSize);
 		MaximumIconSize = parseInt(rb.getString("maximum_icon_size"), MaximumIconSize);
 		DoubleClickInterval = parseInt(rb.getString("double_click_interval"), DoubleClickInterval);
+		FrameRate = parseInt(rb.getString("frame_rate"), FrameRate);
 
 		setResizable(false);
 		addWindowListener(this);
@@ -131,8 +132,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		jsl1.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int v = jsl1.getValue();
-				synchronized(swingBI){
-					for(int c=0;c<swingBI.length;c++){
+				for(int c=0;c<swingBI.length;c++){
+					synchronized(swingBI[c]){
 						swingBI[c].changePower(v);
 					}
 				}
@@ -153,8 +154,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		jsl2.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int v = jsl2.getValue();
-				synchronized(swingBI){
-					for(int c=0;c<swingBI.length;c++){
+				for(int c=0;c<swingBI.length;c++){
+					synchronized(swingBI[c]){
 						swingBI[c].setSpeed(v);
 					}
 				}
@@ -175,8 +176,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		jsl3.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				double v = getCoefficient();
-				synchronized(swingBI){
-					for(int c=0;c<swingBI.length;c++){
+				for(int c=0;c<swingBI.length;c++){
+					synchronized(swingBI[c]){
 						swingBI[c].setCoefficient(v);
 					}
 				}
@@ -189,8 +190,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		jcb4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				IsDecline = ((JCheckBox)e.getSource()).isSelected();
-				synchronized(swingBI){
-					for(int c=0;c<swingBI.length;c++){
+				for(int c=0;c<swingBI.length;c++){
+					synchronized(swingBI[c]){
 						swingBI[c].setDecline(IsDecline);
 					}
 				}
@@ -317,11 +318,11 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	public void run(){
 		while (flag) {
 			try {
-				synchronized (swingBI) {
-					for (int c = 0; c < swingBI.length; c++)
+				for (int c = 0; c < swingBI.length; c++)
+					synchronized (swingBI[c]) {
 						swingBI[c].move();
+					}
 					canvas.repaint();
-				}
 				synchronized (thread) {
 					thread.wait(waitOfThread);
 				}
@@ -543,7 +544,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		public void drawSwingCircle(Graphics g){
 			switch(MouseAcitivity){
 			case 1:
-				synchronized(swingBI){
+				synchronized(swingBI[OvalNumber]){
 					SwingBufferedImage sbi = swingBI[OvalNumber];
 					int cx = sbi.getCenterX();
 					int nr1 = 0, nr2 = 0;
@@ -554,7 +555,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				}
 				break;
 			case 2:
-				synchronized(swingBI){
+				synchronized(swingBI[OvalNumber]){
 					SwingBufferedImage sbi = swingBI[OvalNumber];
 					int cy = sbi.getCenterY();
 					int nr1 = 0, nr2 = 0;
@@ -565,7 +566,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				}
 				break;
 			case 3:
-				synchronized(swingBI){
+				synchronized(swingBI[OvalNumber]){
 					SwingBufferedImage sbi = swingBI[OvalNumber];
 					int cx = sbi.getCenterX();
 					int cy = sbi.getCenterY();
@@ -695,8 +696,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mrp = arg0.getPoint();
 				if(0==MouseAcitivity){
-					synchronized(swingBI){
-						cptr = cptr % swingBI.length;
+					cptr = cptr % swingBI.length;
+					synchronized(swingBI[cptr]){
 						swingBI[cptr].setCenterX(mpp.x);
 						swingBI[cptr].setCenterY(mpp.y);
 						int r = length(mpp, mrp);
