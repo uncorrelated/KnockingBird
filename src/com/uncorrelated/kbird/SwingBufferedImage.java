@@ -2,7 +2,7 @@ package com.uncorrelated.kbird;
 
 import java.awt.image.BufferedImage;
 
-public class SwingBufferedImage {
+public class SwingBufferedImage implements java.lang.Cloneable {
 	private volatile int centerX = 0, centerY = 0, Radius1 = 0, Radius2 = 0, vectorX,
 			vectorY, span = 1, deformation = 1, direction = 1, baseSpeed = 5,
 			power = 0;
@@ -235,5 +235,13 @@ public class SwingBufferedImage {
 	}
 	public boolean toggleSuspend() {
 		return IsSuspend = !IsSuspend;
+	}
+
+	public SwingBufferedImage clone() {
+		try {
+			return (SwingBufferedImage)super.clone();
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
 	}
 }

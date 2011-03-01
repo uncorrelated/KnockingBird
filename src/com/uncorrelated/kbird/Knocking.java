@@ -46,6 +46,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -83,6 +86,71 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private int MaximumIconSize = 128;
 	private int DoubleClickInterval = 1000;
 	private static volatile int NumberOfRestWindow = 0;
+
+	/* For concurrent programming */
+	private class Task {
+		public SwingBufferedImage[] calcuration = null;
+		public BufferedImage rendered = null;
+	}
+	Task[] rbuf = null;
+	private Semaphore csem = new Semaphore(0);
+	private Semaphore rsem = new Semaphore(0);
+	private Semaphore tsem = new Semaphore(0);
+	private volatile int cp = 0, rp = 0, tp = 0;
+	
+	private Thread[] rthread = new Thread[4];
+	private Thread cthread = null;
+
+	public class Renderer implements Runnable {
+		public void run() {
+			while(flag){
+				try {
+					csem.acquire(1);
+					Task t = null;
+					synchronized(rbuf){
+						t = rbuf[rp];
+						rp = (1 + rp)%rbuf.length;
+					}
+					SwingBufferedImage[] a = t.calcuration;
+					BufferedImage bi = image;
+					for(int c=0;c<a.length;c++){
+						bi = a[c].transform(bi);
+					}
+					t.rendered = bi;
+					rsem.release();
+				} catch (InterruptedException e) {
+				}
+			}
+		}
+	}
+
+	public class Calcurator implements Runnable {
+		public void run() {
+			while(flag){
+				try {
+					tsem.acquire(1);
+					int ptr;
+					synchronized(rbuf){
+						ptr = cp;
+						cp = (1 + cp)%rbuf.length;
+					}
+					SwingBufferedImage[] a = new SwingBufferedImage[swingBI.length];
+					for (int c = 0; c < swingBI.length; c++){
+						synchronized (swingBI[c]) {
+							swingBI[c].move();
+							a[c] = swingBI[c].clone();
+						}
+					}
+					Task t = new Task();
+					t.calcuration = a;
+					rbuf[ptr] = t;
+					csem.release();
+				} catch (InterruptedException e) {
+				}
+			}
+		}
+	}
+	/******************************/
 	
 	public Knocking(String fname) throws IOException {
 		super("Knocking Bird");
@@ -95,7 +163,9 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		MaximumIconSize = parseInt(rb.getString("maximum_icon_size"), MaximumIconSize);
 		DoubleClickInterval = parseInt(rb.getString("double_click_interval"), DoubleClickInterval);
 		FrameRate = parseInt(rb.getString("frame_rate"), FrameRate);
-
+		int NumberOfThread = parseInt(rb.getString("number_of_thread"), 4);
+		int SizeOfRbuf = parseInt(rb.getString("size_of_ring_buffer"), 8);
+	
 		setResizable(false);
 		addWindowListener(this);
 
@@ -282,16 +352,28 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		pmenu.setPopupSize(d_jmi.width, jmi.length*d_jmi.height);
 
 		setSize();
-
 		moveCenter();
-		setVisible(true);
 
-		setSize();
-		moveCenter();
+		rbuf = new Task[SizeOfRbuf];
+		tsem.release(SizeOfRbuf);
+
+		cthread = new Thread(new Calcurator());
+		cthread.start();
+
+		rthread = new Thread[NumberOfThread];
+		for(int c=0;c<rthread.length;c++){
+			rthread[c] = new Thread(new Renderer());
+			rthread[c].start();
+		}
 
 		waitOfThread = 1000/FrameRate;
 		thread = new Thread(this);
 		thread.start();
+
+		setVisible(true);
+
+		setSize();
+		moveCenter();
 	}
 
 	private int parseInt(String value, int d){
@@ -324,15 +406,16 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		while (flag) {
 			try {
 				long t1 = System.currentTimeMillis();
-				BufferedImage bi = image;
-				for (int c = 0; c < swingBI.length; c++)
-					synchronized (swingBI[c]) {
-						swingBI[c].move();
-						bi = swingBI[c].transform(bi);
-					}
-				synchronized(transformed){
-					transformed = bi;
+				rsem.acquire(1);
+				Task t = null;
+				synchronized(rbuf){
+					t = rbuf[tp];
+					tp = (1 + tp)%rbuf.length;
 				}
+				synchronized(canvas){
+					transformed = t.rendered;
+				}
+				tsem.release();
 				canvas.repaint();
 				long t2 = System.currentTimeMillis();
 				long wtime = waitOfThread - t2 + t1;
@@ -485,9 +568,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		public void paint(Graphics g) {
 			Image dbuf = createImage(image.getWidth(), image.getHeight());
 			Graphics gd = dbuf.getGraphics();
-			synchronized(transformed){
-				gd.drawImage(transformed, 0, 0, this);
-			}
+			gd.drawImage(transformed, 0, 0, this);
 			if (null != mpp && null != mmp && 0==MouseAcitivity) {
 				int radius = length(mpp, mmp);
 				drawBoldCircle(gd, mpp, radius, radius, Color.yellow);
@@ -835,6 +916,14 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		flag = false;
 		synchronized (thread) {
 			thread.notify();
+		}
+		synchronized (cthread) {
+			cthread.notify();
+		}
+		for(int c=0;c<rthread.length;c++){
+			synchronized (rthread[c]) {
+				rthread[c].notify();
+			}
 		}
 		try {
 			thread.join(1000);
