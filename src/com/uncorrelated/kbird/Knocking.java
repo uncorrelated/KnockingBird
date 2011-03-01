@@ -48,7 +48,6 @@ import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
-import javax.print.attribute.standard.NumberUpSupported;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -311,8 +310,11 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	}
 	
 	private void stopAllSwing(){
-		for (int c = 0; c < swingBI.length; c++)
-			swingBI[c].reset();
+		for (int c = 0; c < swingBI.length; c++){
+			synchronized (swingBI[c]) {
+				swingBI[c].reset();
+			}
+		}
 	}
 	
 	public void run(){
@@ -333,9 +335,11 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 
 	private void setSize() {
 		if (null != image) {
-			for (int c = 0; c < swingBI.length; c++)
-				if(null!=swingBI[c])
+			for (int c = 0; c < swingBI.length; c++){
+				synchronized(swingBI[c]){
 					swingBI[c].reset();
+				}
+			}
 			image = rescaleImage(image, MaximumImageSize);
 			Image icon = rescaleImage(image, MaximumIconSize);
 			setIconImage(icon);
@@ -469,8 +473,11 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			Image dbuf = createImage(image.getWidth(), image.getHeight());
 			Graphics gd = dbuf.getGraphics();
 			BufferedImage bi = image;
-			for (int c = 0; c < swingBI.length; c++)
-				bi = swingBI[c].transform(bi);
+			for (int c = 0; c < swingBI.length; c++){
+				synchronized(swingBI[c]){
+					bi = swingBI[c].transform(bi);
+				}
+			}
 			gd.drawImage(bi, 0, 0, this);
 			if (null != mpp && null != mmp && 0==MouseAcitivity) {
 				int radius = length(mpp, mmp);
@@ -681,7 +688,9 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 
 		public void stopOval(){
 			if(0 < MouseStatus){
-				swingBI[OvalNumber].reset();
+				synchronized(swingBI[OvalNumber]){
+					swingBI[OvalNumber].reset();
+				}
 				MouseClickedTime = 0;
 			}
 		}
