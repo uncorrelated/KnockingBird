@@ -321,7 +321,9 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			for (int c = 0; c < swingBI.length; c++)
 				if(null!=swingBI[c])
 					swingBI[c].reset();
-			rescaleImage();
+			image = rescaleImage(image, 480);
+			Image icon = rescaleImage(image, 128);
+			setIconImage(icon);
 			if (null != canvas) {
 				canvas.setSize(image.getWidth(), image.getHeight());
 			}
@@ -398,12 +400,11 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 	}
 
-	public boolean rescaleImage() {
+	public BufferedImage rescaleImage(BufferedImage image, int maximum_size) {
 		int original_height = image.getHeight();
 		int destination_height = original_height;
 		int original_width = image.getWidth();
 		int destination_width = original_width;
-		int maximum_size = 480;
 		boolean IsLarge = false;
 		if (maximum_size < original_width) {
 			destination_width = maximum_size;
@@ -433,7 +434,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			atfp.filter(image, image2);
 			image = image2;
 		}
-		return IsLarge;
+		return image;
 	}
 
 	private class ImgCanvas extends Canvas implements MouseListener,
