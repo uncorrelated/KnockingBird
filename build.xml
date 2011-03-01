@@ -6,7 +6,7 @@
   <property name="dst_res" value="bin/com/uncorrelated/kbird"/>
   <property name="manifest" value="META-INF/MANIFEST.MF"/>
   <property name="project" value="KnockingBird"/>
-  <property name="version" value="0.93"/>
+  <property name="version" value="0.94"/>
   <property name="jar" value="${project}-${version}.jar"/>
 
   <target name="jar" depends="compile">
@@ -17,6 +17,7 @@
     <mkdir dir="${dst}"/>
     <copy todir="${dst_res}" preservelastmodified="true">
       <fileset dir="${src_res}" includes="*.jpg"/>
+      <fileset dir="${src_res}" includes="*.png"/>
     </copy>
   	<native2ascii src="${src_res}" dest="${dst_res}" includes="*.properties"/>
     <javac includeAntRuntime="true" debug="true" srcdir="${src}" destdir="${dst}" />
