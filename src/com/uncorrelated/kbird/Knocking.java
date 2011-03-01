@@ -851,6 +851,13 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Knocking bubble = new Knocking(args.length < 1 ? null : args[0]);
+		Knocking[] kn = new Knocking[0<args.length ? args.length : 1];
+		if(args.length<1){
+			kn[0] = new Knocking(null);
+		} else {
+			for(int c=0;c<args.length && c<kn.length; c++){
+				kn[c] = new Knocking(args[c]);
+			}
+		}
 	}
 }
