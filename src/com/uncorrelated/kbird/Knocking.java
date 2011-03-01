@@ -48,6 +48,7 @@ import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -82,6 +83,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 
 	public Knocking(String fname) throws IOException {
 		super("Knocking Bird");
+        setIconImage(ImageIO.read(this.getClass().getResource("KnockingBird.png")));
 		setUI();
 
 		// http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/
