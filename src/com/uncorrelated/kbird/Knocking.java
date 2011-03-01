@@ -724,6 +724,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 
 		public void mouseDragged(MouseEvent e) {
 			mmp = e.getPoint();
+			MouseClickedTime = 0;
 		}
 
 		public void mouseMoved(MouseEvent e) {
