@@ -68,7 +68,7 @@ import javax.swing.filechooser.FileFilter;
 
 public class Knocking extends JFrame implements WindowListener, Runnable {
 	private ImgCanvas canvas = null;
-	private BufferedImage image = null;
+	private BufferedImage image = null, transformed = null;
 	private int FrameRate = 10;
 	private SwingBufferedImage[] swingBI = new SwingBufferedImage[10];
 	private JSlider jsl1, jsl2, jsl3;
@@ -323,13 +323,23 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	public void run(){
 		while (flag) {
 			try {
+				long t1 = System.currentTimeMillis();
+				BufferedImage bi = image;
 				for (int c = 0; c < swingBI.length; c++)
 					synchronized (swingBI[c]) {
 						swingBI[c].move();
+						bi = swingBI[c].transform(bi);
 					}
-					canvas.repaint();
-				synchronized (thread) {
-					thread.wait(waitOfThread);
+				synchronized(transformed){
+					transformed = bi;
+				}
+				canvas.repaint();
+				long t2 = System.currentTimeMillis();
+				long wtime = waitOfThread - t2 + t1;
+				if(0<wtime){
+					synchronized (thread) {
+						thread.wait(wtime);
+					}
 				}
 			} catch (InterruptedException e) {
 			}
@@ -343,7 +353,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 					swingBI[c].reset();
 				}
 			}
-			image = rescaleImage(image, MaximumImageSize);
+			transformed = image = rescaleImage(image, MaximumImageSize);
 			Image icon = rescaleImage(image, MaximumIconSize);
 			setIconImage(icon);
 			if (null != canvas) {
@@ -475,13 +485,9 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		public void paint(Graphics g) {
 			Image dbuf = createImage(image.getWidth(), image.getHeight());
 			Graphics gd = dbuf.getGraphics();
-			BufferedImage bi = image;
-			for (int c = 0; c < swingBI.length; c++){
-				synchronized(swingBI[c]){
-					bi = swingBI[c].transform(bi);
-				}
+			synchronized(transformed){
+				gd.drawImage(transformed, 0, 0, this);
 			}
-			gd.drawImage(bi, 0, 0, this);
 			if (null != mpp && null != mmp && 0==MouseAcitivity) {
 				int radius = length(mpp, mmp);
 				drawBoldCircle(gd, mpp, radius, radius, Color.yellow);
