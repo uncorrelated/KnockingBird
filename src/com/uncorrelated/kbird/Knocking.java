@@ -165,8 +165,6 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		MaximumIconSize = parseInt(rb.getString("maximum_icon_size"), MaximumIconSize);
 		DoubleClickInterval = parseInt(rb.getString("double_click_interval"), DoubleClickInterval);
 		FrameRate = parseInt(rb.getString("frame_rate"), FrameRate);
-		int NumberOfThread = parseInt(rb.getString("number_of_thread"), 4);
-		int SizeOfRbuf = parseInt(rb.getString("size_of_ring_buffer"), 8);
 	
 		setResizable(false);
 		addWindowListener(this);
@@ -356,13 +354,14 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		setSize();
 		moveCenter();
 
-		rbuf = new Task[SizeOfRbuf];
-		tsem.release(SizeOfRbuf);
+		int number_of_core = Runtime.getRuntime().availableProcessors();
+		rbuf = new Task[2 * number_of_core];
+		tsem.release(rbuf.length);
 
 		cthread = new Thread(new Calcurator());
 		cthread.start();
 
-		rthread = new Thread[NumberOfThread];
+		rthread = new Thread[number_of_core];
 		for(int c=0;c<rthread.length;c++){
 			rthread[c] = new Thread(new Renderer());
 			rthread[c].start();
