@@ -17,7 +17,9 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.color.CMMException;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -29,6 +31,8 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -54,10 +58,13 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -309,7 +316,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			public void popupMenuCanceled(PopupMenuEvent e) {
 			}
 		});
-		jmi = new JMenuItem[4];
+		jmi = new JMenuItem[6];
 		int jmi_c = 0;
 		
 		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item3"));
@@ -336,21 +343,53 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		});
 		pmenu.add(jmi[jmi_c++]);
 
+		Dimension d_jmi = jmi[0].getPreferredSize();
+		for(int c=0;c<3;c++){
+			Dimension d_jmi_t = jmi[c].getPreferredSize();
+			if(d_jmi_t.width > d_jmi.width)
+				d_jmi = d_jmi_t;
+		}
+		pmenu.setPopupSize(d_jmi.width, 3*(d_jmi.height + 2));
+
+		JMenuBar jmb = new JMenuBar();
+		JMenu[] jm = new JMenu[2];
+		int jm_c = 0;
+		jm[jm_c] = new JMenu(rb.getString("menu1"));
+		
 		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item2"));
 		jmi[jmi_c].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				openFileChooser();
 			}
 		});
-		pmenu.add(jmi[jmi_c++]);
-		Dimension d_jmi = jmi[0].getPreferredSize();
-		for(int c=0;c<jmi.length;c++){
-			Dimension d_jmi_t = jmi[c].getPreferredSize();
-			if(d_jmi_t.width > d_jmi.width)
-				d_jmi = d_jmi_t;
-		}
-		pmenu.setPopupSize(d_jmi.width, jmi.length*d_jmi.height);
+		jmi[jmi_c].setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+		
+		jm[jm_c].add(jmi[jmi_c++]);
+		jmb.add(jm[jm_c++]);
 
+		jm[jm_c] = new JMenu(rb.getString("menu2"));
+		
+		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item5"));
+		jmi[jmi_c].addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				copy();
+			}
+		});
+		jmi[jmi_c].setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
+		jm[jm_c].add(jmi[jmi_c++]);
+		
+		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item6"));
+		jmi[jmi_c].addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				paste();
+			}
+		});
+		jmi[jmi_c].setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
+		jm[jm_c].add(jmi[jmi_c++]);
+		
+		jmb.add(jm[jm_c++]);
+		setJMenuBar(jmb);
+		
 		setSize();
 		moveCenter();
 
@@ -516,6 +555,30 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		int selected = fc.showOpenDialog(this);
 		if (selected == JFileChooser.APPROVE_OPTION){
 			setImage(fc.getSelectedFile());
+		}
+	}
+
+	private void copy(){
+		Toolkit kit = Toolkit.getDefaultToolkit();
+		Clipboard clip = kit.getSystemClipboard();
+		ImageSelection is = null;
+		synchronized(transformed){
+			is = new ImageSelection(transformed);
+		}
+		clip.setContents(is, is);
+	}
+	
+	private void paste(){
+		Toolkit kit = Toolkit.getDefaultToolkit();
+		Clipboard clip = kit.getSystemClipboard();
+		try {
+			Image cimage = (Image)clip.getData(DataFlavor.imageFlavor);
+			image = ImageConverter.convert(cimage);
+			setSize();
+		} catch (UnsupportedFlavorException e) {
+			return;
+		} catch (IOException e) {
+			return;
 		}
 	}
 
