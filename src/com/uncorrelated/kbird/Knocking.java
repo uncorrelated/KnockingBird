@@ -46,6 +46,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ResourceBundle;
@@ -78,6 +79,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private ImgCanvas canvas = null;
 	private BufferedImage image = null, transformed = null;
 	private int FrameRate = 10;
+	private final static int BenchmarkFrameRate = 120;
 	private SwingBufferedImage[] swingBI = new SwingBufferedImage[10];
 	private JSlider jsl1, jsl2, jsl3;
 	private JPopupMenu pmenu;
@@ -91,6 +93,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private int MaximumIconSize = 128;
 	private int DoubleClickInterval = 1000;
 	private static volatile int NumberOfRestWindow = 0;
+	private boolean ShowFrameRate = false;
 
 	/* For concurrent programming */
 	private class Task {
@@ -289,7 +292,28 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		Dimension d_btns = btns.getPreferredSize();
 		d_btns.width = 300;
 		btns.setPreferredSize(d_btns);
-		
+
+		GridBagConstraints gbc7 = new GridBagConstraints();
+		gbc7.gridx = 0;
+		gbc7.gridy = 5;
+		Container benchmarks = new Container();
+		benchmarks.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 8));
+		JCheckBox cb_fr = new JCheckBox(rb.getString("menu_item7"));
+		cb_fr.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(ShowFrameRate){
+					ShowFrameRate = false;
+					waitOfThread = 1000/FrameRate;
+				} else {
+					ShowFrameRate = true;
+					waitOfThread = 1000/BenchmarkFrameRate;
+				}
+			}
+		});
+		benchmarks.add(cb_fr);
+		gbl.setConstraints(benchmarks, gbc7);
+		add(benchmarks);
+
 		pmenu = new JPopupMenu();
 		pmenu.addPopupMenuListener(new PopupMenuListener() {
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
@@ -316,6 +340,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			public void popupMenuCanceled(PopupMenuEvent e) {
 			}
 		});
+
 		jmi = new JMenuItem[6];
 		int jmi_c = 0;
 		
@@ -623,9 +648,10 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			MouseMotionListener, DropTargetListener {
 		private Point mpp = null, mrp = null, mmp = new Point(0, 0);
 		private int cptr = 0;
-		private boolean IsMeasureFrameRate = false;
 		private int nof = 0, sec = (int)System.currentTimeMillis()/1000;
 		private boolean IsMessage = true;
+		private double FrameRate = 0F;
+		private DecimalFormat FrameRateFormat = new DecimalFormat("###.##");
 
 		public ImgCanvas() {
 			addMouseListener(this);
@@ -650,17 +676,22 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			drawSwingCircle(gd);
 			if(IsMessage)
 				showMessage(gd, rb.getString("message01"));
-			g.drawImage(dbuf, 0, 0, this);
-			if(IsMeasureFrameRate){
+			else if(ShowFrameRate){
 				nof++;
 				int csec = (int)(System.currentTimeMillis()/1000);
 				if(sec < csec){
 					int mt = csec - sec;
-					System.out.println((float)nof/mt);
+					FrameRate = (double)nof/mt;
 					sec = csec;
 					nof = 0;
 				}
+				StringBuilder sb = new StringBuilder(rb.getString("message02"));
+				sb.append(" ");
+				sb.append(FrameRateFormat.format(FrameRate));
+				sb.append("/sec");
+				showMessage(gd, sb.toString());
 			}
+			g.drawImage(dbuf, 0, 0, this);
 		}
 
 		Font font = new Font("MS UI GOTHIC", Font.PLAIN, 16);
