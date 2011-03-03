@@ -58,12 +58,8 @@ public class SwingBufferedImage implements java.lang.Cloneable {
 		return n;
 	}
 
-	private BufferedImage transform(BufferedImage src, int cx, int cy, int r1, int r2,
+	private int[] transform(int[] bms, int w, int h, int cx, int cy, int r1, int r2,
 			int mx, int my, double coefficient) {
-		int w = src.getWidth();
-		int h = src.getHeight();
-		BufferedImage dst = new BufferedImage(w, h, src.getType());
-		int[] bms = src.getRGB(0, 0, w, h, null, 0, w);
 		int[] bmd = new int[bms.length];
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
@@ -90,9 +86,8 @@ public class SwingBufferedImage implements java.lang.Cloneable {
 				}
 			}
 		}
-		dst.setRGB(0, 0, w, h, bmd, 0, w);
-		return dst;
-	}
+		return bmd;
+	}	
 
 	private int mean(int p11, int p12, int p21, int p22, double a, double b) {
 		double r11 = (1 - a) * (1 - b);
@@ -111,6 +106,15 @@ public class SwingBufferedImage implements java.lang.Cloneable {
 		return red | green | blue;
 	}
 
+	private BufferedImage transform(BufferedImage src, int cx, int cy, int r1, int r2,
+			int mx, int my, double coefficient) {
+		int w = src.getWidth();
+		int h = src.getHeight();
+		BufferedImage dst = new BufferedImage(w, h, src.getType());
+		dst.setRGB(0, 0, w, h, transform(src.getRGB(0, 0, w, h, null, 0, w), w, h, cx, cy, r1, r2, mx, my, coefficient), 0, w);
+		return dst;
+	}
+
 	public BufferedImage transform(BufferedImage src) {
 		if (0 >= Radius1)
 			return src;
@@ -118,6 +122,13 @@ public class SwingBufferedImage implements java.lang.Cloneable {
 				/ span, vectorY * deformation / span, coefficient);
 	}
 
+	public int[] transform(int[] bms, int w, int h) {
+		if (0 >= Radius1)
+			return bms;
+		return transform(bms, w, h, centerX, centerY, Radius1, Radius2, vectorX * deformation
+				/ span, vectorY * deformation / span, coefficient);
+	}
+	
 	public int getCenterX() {
 		return centerX;
 	}

@@ -121,10 +121,14 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 					}
 					synchronized(t){
 						SwingBufferedImage[] a = t.calcuration;
-						BufferedImage bi = image;
+						int w = image.getWidth();
+						int h = image.getHeight();
+						BufferedImage bi = new BufferedImage(w, h, image.getType());
+						int[] rgb = image.getRGB(0, 0, w, h, null, 0, w);
 						for(int c=0;c<a.length;c++){
-							bi = a[c].transform(bi);
+							rgb = a[c].transform(rgb, w, h);
 						}
+						bi.setRGB(0, 0, w, h, rgb, 0, w);
 						t.rendered = bi;
 					}
 					rsem.release(1);
