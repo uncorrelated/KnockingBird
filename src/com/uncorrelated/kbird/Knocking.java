@@ -79,7 +79,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private ImgCanvas canvas = null;
 	private BufferedImage image = null, transformed = null;
 	private int FrameRate = 10;
-	private final static int BenchmarkFrameRate = 120;
+	private final static int BenchmarkFrameRate = 150;
 	private SwingBufferedImage[] swingBI = new SwingBufferedImage[10];
 	private JSlider jsl1, jsl2, jsl3;
 	private JPopupMenu pmenu;
@@ -228,7 +228,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		JLabel jl2 = new JLabel(rb.getString("param2"));
 		jl2.setPreferredSize(dm);
 		jsls2.add(jl2);
-		jsls2.add(jsl2 = new JSlider(1, 100, 25));
+		jsls2.add(jsl2 = new JSlider(1, 100, parseInt(rb.getString("default_speed"), 15)));
 		jsl2.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int v = jsl2.getValue();
