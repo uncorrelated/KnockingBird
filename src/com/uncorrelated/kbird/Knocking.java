@@ -673,7 +673,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				gd.setColor(Color.yellow);
 				gd.drawLine(mpp.x, mpp.y, mmp.x, mmp.y);
 			}
-			drawSwingCircle(gd);
+			if(null!=getMousePosition())
+				drawSwingOval(gd);
 			if(IsMessage)
 				showMessage(gd, rb.getString("message01"));
 			else if(ShowFrameRate){
@@ -715,7 +716,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			int dy = p1.y - p2.y;
 			return (int) Math.sqrt(dx * dx + dy * dy);
 		}
-
+		
 		private void drawCircle(Graphics g, int x, int y, int r1, int r2) {
 			g.drawArc(x - r1, y - r2, 2 * r1, 2 * r2, 0, 360);
 		}
@@ -738,7 +739,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		private int MouseAcitivity = 0;
 		private long MouseClickedTime = 0;
 		private int OvalNumber = 0;
-		public void drawSwingCircle(Graphics g){
+		public void drawSwingOval(Graphics g){
 			switch(MouseAcitivity){
 			case 1:
 				synchronized(swingBI[OvalNumber]){
