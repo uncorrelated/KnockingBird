@@ -273,12 +273,26 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			}
 		});
 
+		JCheckBox jcb_fr = new JCheckBox(rb.getString("menu_item7"));
+		jcb_fr.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(ShowFrameRate){
+					ShowFrameRate = false;
+					waitOfThread = 1000/FrameRate;
+				} else {
+					ShowFrameRate = true;
+					waitOfThread = 1000/BenchmarkFrameRate;
+				}
+			}
+		});
+
 		GridBagConstraints gbc6 = new GridBagConstraints();
 		gbc6.gridx = 0;
 		gbc6.gridy = 4;
 		Container btns = new Container();
-		btns.setLayout(new GridLayout(1, 2));
+		btns.setLayout(new GridLayout(1, 3));
 		btns.add(jcb4);
+		btns.add(jcb_fr);
 		JButton stop_b = new JButton(rb.getString("button1"));
 		stop_b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -292,27 +306,6 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		Dimension d_btns = btns.getPreferredSize();
 		d_btns.width = 300;
 		btns.setPreferredSize(d_btns);
-
-		GridBagConstraints gbc7 = new GridBagConstraints();
-		gbc7.gridx = 0;
-		gbc7.gridy = 5;
-		Container benchmarks = new Container();
-		benchmarks.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 8));
-		JCheckBox cb_fr = new JCheckBox(rb.getString("menu_item7"));
-		cb_fr.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(ShowFrameRate){
-					ShowFrameRate = false;
-					waitOfThread = 1000/FrameRate;
-				} else {
-					ShowFrameRate = true;
-					waitOfThread = 1000/BenchmarkFrameRate;
-				}
-			}
-		});
-		benchmarks.add(cb_fr);
-		gbl.setConstraints(benchmarks, gbc7);
-		add(benchmarks);
 
 		pmenu = new JPopupMenu();
 		pmenu.addPopupMenuListener(new PopupMenuListener() {
