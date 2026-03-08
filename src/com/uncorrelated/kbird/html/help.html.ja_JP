@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="content-type" content="text/html;charset=UTF-8"/>
+<title>About</title>
+<style type="text/css">
+body {
+	background-color: white;
+}
+h2 {
+	font-size: 14pt;
+}
+p {
+	font-size: 12pt;
+	text-indent: 10pt;
+	margin: 0;
+}
+ol {
+	margin-left: 16pt;
+	padding-left: 16pt;
+}
+</style>
+</head>
+<body>
+<h2>1. 基本操作</h2>
+<p>画像の上を、マウスなどのポインティング・デバイスでドラッグすると、線を延ばし、丸を大きくする事ができます。線が揺れのベクトルで、丸が揺れの範囲になります。好きな位置で、ドラッグを止めてください。</p>
+<p>丸は境界をマウスでドラッグすることで楕円に変形させることができ、中央をドラッグすることで移動させることができます。また、揺れの大きさや速度は、下側のコントロールで操作する事ができます。</p>
+<h2>2. 画像の変更</h2>
+<p>JPEG/PNG/GIFファイルをドラッグ・アンド・ドロップするか、ファイルを開くことにより揺らす画像を変更する事ができます。また、他の画像編集ソフトから、コピー・アンド・ペーストすることでも、画像を変更することができます。</p>
+<h2>3. ベンチマーク</h2>
+<p>下側のベンチマーク・チェックボックスにチェックを入れると、自動で画面内に10箇所丸を描き、どれだけフレームレートがでるかノーウェイトで処理をはじめます。画像の大きさや、Javaのバージョンで速度が変化するので注意してください。</p>
+</body>
+</html>

@@ -1,7 +1,9 @@
 package com.uncorrelated.kbird;
 
+import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -54,8 +56,12 @@ import java.util.StringTokenizer;
 import java.util.concurrent.Semaphore;
 
 import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -63,7 +69,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -82,13 +90,17 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private final static int BenchmarkFrameRate = 150;
 	private SwingBufferedImage[] swingBI = new SwingBufferedImage[10];
 	private JSlider jsl1, jsl2, jsl3;
+	private int[] sl_init = {20, 15, 100};
+	private JCheckBox jcb4;
+	private JButton stop_b;
 	private JPopupMenu pmenu;
 	private JMenuItem[] jmi;
 	private boolean IsDecline = false;
 	private Thread thread = null;
 	private volatile long waitOfThread;
 	private volatile boolean flag = true;
-	private ResourceBundle rb = ResourceBundle.getBundle("com.uncorrelated.kbird.Knocking");
+	private static ResourceBundle rb = ResourceBundle.getBundle("com.uncorrelated.kbird.Knocking");
+	private static String title = rb.getString("application.name") + "" + rb.getString("application.version");
 	private int MaximumImageSize = 480;
 	private int MaximumIconSize = 128;
 	private int DoubleClickInterval = 1000;
@@ -167,9 +179,9 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 	}
 	/******************************/
-	
+
 	public Knocking(String fname) throws IOException {
-		super("Knocking Bird");
+		super(title);
 		setUI();
 
 		NumberOfRestWindow++;
@@ -189,24 +201,17 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		GridBagLayout gbl = new GridBagLayout();
 		setLayout(gbl);
 
-		GridBagConstraints gbc1 = new GridBagConstraints();
-		gbc1.ipady = 8;
-		gbc1.gridx = gbc1.gridy = 0;
 		canvas = new ImgCanvas();
-		canvas.setSize(image.getWidth(), image.getHeight());
-		gbl.setConstraints(canvas, gbc1);
+		gbl.setConstraints(canvas, makeGridBagConstraints(0));
 		add(canvas);
 
-		GridBagConstraints gbc2 = new GridBagConstraints();
-		gbc2.gridx = 0;
-		gbc2.gridy = 1;
 		Container jsls1 = new Container();
 		jsls1.setLayout(new FlowLayout());
 		Dimension dm = new Dimension(96, 16);
 		JLabel jl1 = new JLabel(rb.getString("param1"));
 		jl1.setPreferredSize(dm);
 		jsls1.add(jl1);
-		jsls1.add(jsl1 = new JSlider(10, 50, 20));
+		jsls1.add(jsl1 = new JSlider(10, 50, sl_init[0]));
 		jsl1.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int v = jsl1.getValue();
@@ -217,18 +222,15 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				}
 			}
 		});
-		gbl.setConstraints(jsls1, gbc2);
+		gbl.setConstraints(jsls1, makeGridBagConstraints(1));
 		add(jsls1);
 
-		GridBagConstraints gbc3 = new GridBagConstraints();
-		gbc3.gridx = 0;
-		gbc3.gridy = 2;
 		Container jsls2 = new Container();
 		jsls2.setLayout(new FlowLayout());
 		JLabel jl2 = new JLabel(rb.getString("param2"));
 		jl2.setPreferredSize(dm);
 		jsls2.add(jl2);
-		jsls2.add(jsl2 = new JSlider(1, 100, parseInt(rb.getString("default_speed"), 15)));
+		jsls2.add(jsl2 = new JSlider(1, 100, parseInt(rb.getString("default_speed"), sl_init[1])));
 		jsl2.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int v = jsl2.getValue();
@@ -239,18 +241,15 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				}
 			}
 		});
-		gbl.setConstraints(jsls2, gbc3);
+		gbl.setConstraints(jsls2, makeGridBagConstraints(2));
 		add(jsls2);
 
-		GridBagConstraints gbc4 = new GridBagConstraints();
-		gbc4.gridx = 0;
-		gbc4.gridy = 3;
 		Container jsls3 = new Container();
 		jsls3.setLayout(new FlowLayout());
 		JLabel jl3 = new JLabel(rb.getString("param3"));
 		jl3.setPreferredSize(dm);
 		jsls3.add(jl3);
-		jsls3.add(jsl3 = new JSlider(50, 150, 100));
+		jsls3.add(jsl3 = new JSlider(50, 150, sl_init[2]));
 		jsl3.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				double v = getCoefficient();
@@ -261,10 +260,10 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				}
 			}
 		});
-		gbl.setConstraints(jsls3, gbc4);
+		gbl.setConstraints(jsls3, makeGridBagConstraints(3));
 		add(jsls3);
 		
-		JCheckBox jcb4 = new JCheckBox(rb.getString("param4"), IsDecline);
+		jcb4 = new JCheckBox(rb.getString("param4"), IsDecline);
 		jcb4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				IsDecline = ((JCheckBox)e.getSource()).isSelected();
@@ -276,35 +275,57 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				pmenu.setVisible(false);
 			}
 		});
-
+		
 		JCheckBox jcb_fr = new JCheckBox(rb.getString("menu_item7"));
 		jcb_fr.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(ShowFrameRate){
-					ShowFrameRate = false;
-					waitOfThread = 1000/FrameRate;
-				} else {
-					ShowFrameRate = true;
-					waitOfThread = 1000/BenchmarkFrameRate;
+			    if (ShowFrameRate) {
+				ShowFrameRate = false;
+				jsl1.setValue(sl_init[0]);
+				jsl2.setValue(sl_init[1]);
+				jsl3.setValue(sl_init[2]);
+				canvas.showMessage();
+				waitOfThread = 1000 / FrameRate;
+				stopAllSwing();
+				setOperable(true);
+			    } else {
+				setOperable(false);
+				ShowFrameRate = true;
+				waitOfThread = 1000 / BenchmarkFrameRate;
+				sl_init[0] = jsl1.getValue();
+				sl_init[1] = jsl2.getValue();
+				sl_init[2] = jsl3.getValue();
+				jsl1.setValue(30);
+				jsl2.setValue(50);
+				jsl3.setValue(100);
+				int w = canvas.getWidth();
+				int h = canvas.getHeight();
+				int s = w < h ? w : h;
+				double[] p_x = {0.1, 0.2, 0.3, 0.4, 0.5, 0.5, 0.6, 0.7, 0.8, 0.9};
+				double[] p_y = {0.9, 0.2, 0.7, 0.4, 0.5, 0.5, 0.6, 0.3, 0.8, 0.1};
+				double[] p_w = {0.3, 0.4, 0.2, 0.1, 0.0, 0.2, 0.1, 0.2, 0.2, 0.3};
+				double[] p_h = {0.3, 0.0, 0.2, 0.0, 0.5, 0.0, 0.0, 0.2, 0.0, 0.3};
+				for (int i = 0; i < swingBI.length; i++) {
+				    canvas.setSwingBI(new Point((int) (p_x[i] * w), (int) (p_y[i] * h)), 
+					    new Point((int) ((p_x[i] + p_w[i]) * w), (int) ((p_y[i] + p_h[i]) * h)));
 				}
+
+			    }
 			}
 		});
 
-		GridBagConstraints gbc6 = new GridBagConstraints();
-		gbc6.gridx = 0;
-		gbc6.gridy = 4;
 		Container btns = new Container();
 		btns.setLayout(new GridLayout(1, 3));
 		btns.add(jcb4);
 		btns.add(jcb_fr);
-		JButton stop_b = new JButton(rb.getString("button1"));
+		stop_b = new JButton(rb.getString("button1"));
 		stop_b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				stopAllSwing();
 			}
 		});
 		btns.add(stop_b);
-		gbl.setConstraints(btns, gbc6);
+		gbl.setConstraints(btns, makeGridBagConstraints(4));
 		add(btns);
 
 		Dimension d_btns = btns.getPreferredSize();
@@ -338,7 +359,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			}
 		});
 
-		jmi = new JMenuItem[6];
+		jmi = new JMenuItem[8];
 		int jmi_c = 0;
 		
 		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item3"));
@@ -347,6 +368,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				canvas.suspendOval();
 			}
 		});
+		setIcon(jmi[jmi_c], "icon_pause");
 		pmenu.add(jmi[jmi_c++]);
 		
 		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item4"));
@@ -355,6 +377,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				canvas.resumeOval();
 			}
 		});
+		setIcon(jmi[jmi_c], "icon_restart");
 		pmenu.add(jmi[jmi_c++]);
 
 		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item1"));
@@ -363,6 +386,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				canvas.stopOval();
 			}
 		});
+		setIcon(jmi[jmi_c], "icon_stop");
 		pmenu.add(jmi[jmi_c++]);
 
 		Dimension d_jmi = jmi[0].getPreferredSize();
@@ -374,7 +398,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		pmenu.setPopupSize(d_jmi.width, 3*(d_jmi.height + 2));
 
 		JMenuBar jmb = new JMenuBar();
-		JMenu[] jm = new JMenu[2];
+		JMenu[] jm = new JMenu[3];
 		int jm_c = 0;
 		jm[jm_c] = new JMenu(rb.getString("menu1"));
 		
@@ -385,7 +409,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			}
 		});
 		jmi[jmi_c].setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
-		
+		setIcon(jmi[jmi_c], "icon_file_open");
 		jm[jm_c].add(jmi[jmi_c++]);
 		jmb.add(jm[jm_c++]);
 
@@ -398,6 +422,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			}
 		});
 		jmi[jmi_c].setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
+		setIcon(jmi[jmi_c], "icon_edit_copy");
 		jm[jm_c].add(jmi[jmi_c++]);
 		
 		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item6"));
@@ -407,13 +432,42 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			}
 		});
 		jmi[jmi_c].setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
+		setIcon(jmi[jmi_c], "icon_edit_paste");
 		jm[jm_c].add(jmi[jmi_c++]);
 		
 		jmb.add(jm[jm_c++]);
+
+		jm[jm_c] = new JMenu(rb.getString("menu3"));
+
+		JDialog jd_help = createMsgDialog(rb.getString("help.title"), rb.getString("help.html"));
+		
+		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item8"));
+		jmi[jmi_c].addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			    jd_help.setVisible(true);
+			}
+		});
+		jmi[jmi_c].setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+		setIcon(jmi[jmi_c], "icon_usage");
+		jm[jm_c].add(jmi[jmi_c++]);
+
+		JDialog jd_about = createMsgDialog(rb.getString("about.title"), rb.getString("about.html"));
+
+		jmi[jmi_c] = new JMenuItem(rb.getString("menu_item9"));
+		jmi[jmi_c].addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			    jd_about.setVisible(true);
+			}
+		});
+		setIcon(jmi[jmi_c], "icon_about");
+		jm[jm_c].add(jmi[jmi_c++]);
+
+		jmb.add(jm[jm_c++]);
+
 		setJMenuBar(jmb);
 		
 		setSize();
-		moveCenter();
+		moveCenter(this);
 
 		int number_of_core = Runtime.getRuntime().availableProcessors();
 		rbuf = new Task[2 + number_of_core];
@@ -433,11 +487,76 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		thread.start();
 
 		setVisible(true);
-
-		setSize();
-		moveCenter();
 	}
 
+	private void setOperable(boolean f){
+	    jsl1.setEnabled(f);
+	    jsl2.setEnabled(f);
+	    jsl3.setEnabled(f);
+	    jcb4.setEnabled(f);
+	    stop_b.setEnabled(f);
+	    pmenu.setEnabled(f);
+	    for(int i = 0; i<jmi.length; i++){
+		jmi[i].setEnabled(f);
+	    }
+	}
+	
+	private GridBagConstraints makeGridBagConstraints(int y){
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.insets = new Insets(0, 0, 0, 0);
+		gbc.weightx = 0.0;
+		gbc.weighty = 0.0; 
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		gbc.gridx = 0;
+		gbc.gridy = y;
+		return gbc;
+	}
+
+	private void setIcon(AbstractButton button, String name){
+		button.setIcon(new ImageIcon(getClass().getResource(rb.getString(name))));
+	}
+
+	private JDialog createMsgDialog(String title, String fpath) {
+	    try{
+		JDialog dialog = new JDialog();
+		SwingUtilities.updateComponentTreeUI(dialog);
+		dialog.setTitle(this.title);
+		dialog.setSize(400, 400);
+		BorderLayout bl = new BorderLayout();
+		bl.setVgap(8);
+		dialog.setLayout(bl);
+		JLabel jl = new JLabel(title, JLabel.CENTER);
+		jl.setPreferredSize(new Dimension(300, 40));
+		jl.setFont(new Font(rb.getString("font.dialog"), Font.BOLD, 18));
+		dialog.add(jl, BorderLayout.NORTH);
+		JEditorPane editorPane = new JEditorPane(getClass().getResource(fpath));
+		editorPane.setEditable(false);
+		editorPane.setContentType("text/html");
+		dialog.add(new JScrollPane(editorPane,
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
+		JButton jb = new JButton(rb.getString("button2"));
+		jb.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dialog.setVisible(false);
+			}
+		});
+		Container c = new Container();
+		c.setLayout(new GridLayout(1, 3));
+		c.add(new JPanel());
+		c.add(jb);
+		c.add(new JPanel());
+		dialog.add(c, BorderLayout.SOUTH);
+		moveCenter(dialog);
+		return(dialog);
+	    } catch(IOException ex){
+		ex.printStackTrace();
+	    }
+	    return null;
+	}
+	
 	private int parseInt(String value, int d){
 		try {
 			return Integer.parseInt(value);
@@ -446,10 +565,10 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 	}
 	
-	private void moveCenter(){
+	private void moveCenter(Component c){
 		Rectangle screen = getGraphicsConfiguration().getBounds();
-		setLocation(screen.x + screen.width/2  - getSize().width/2,
-				screen.y + screen.height/2 - getSize().height/2);
+		c.setLocation(screen.x + screen.width/2  - c.getSize().width/2,
+				screen.y + screen.height/2 - c.getSize().height/2);
 	}
 	
 	public double getCoefficient(){
@@ -506,7 +625,9 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			setIconImage(icon);
 			if (null != canvas) {
 				canvas.setSize(image.getWidth(), image.getHeight());
+				canvas.setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
 			}
+			pack();
 			Dimension d = getPreferredSize();
 			Insets is = getInsets();
 			int width = d.width + is.left + is.right;
@@ -692,7 +813,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			g.drawImage(dbuf, 0, 0, this);
 		}
 
-		Font font = new Font("MS UI GOTHIC", Font.PLAIN, 16);
+		Font font = new Font(rb.getString("font.message"), Font.PLAIN, 16);
 		Color bgColor = new Color(0F, 0F, 0F, 0.5F);
 		private void showMessage(Graphics g, String msg){
 			FontMetrics fm = g.getFontMetrics(font);
@@ -838,6 +959,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 
 		public void mousePressed(MouseEvent arg0) {
+		    if(!ShowFrameRate){
 			IsMessage = false;
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mpp = arg0.getPoint();
@@ -846,6 +968,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			} else if (arg0.isPopupTrigger()) {
 				pmenu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
 			}
+		    }
 		}
 
 		private void toggleOval(){
@@ -889,26 +1012,32 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			return OvalNumber;
 		}
 
+		public void setSwingBI(Point mpp, Point mrp){
+		    cptr = cptr % swingBI.length;
+		    synchronized(swingBI[cptr]){
+			swingBI[cptr].setCenterX(mpp.x);
+			swingBI[cptr].setCenterY(mpp.y);
+			int r = length(mpp, mrp);
+			int power = jsl1.getValue();
+			int vx = 0 < r ? power * (mrp.x - mpp.x) / r : 0;
+			int vy = 0 < r ? power * (mrp.y - mpp.y) / r : 0;
+			swingBI[cptr].setRadius(r, r);
+			swingBI[cptr].setVector(vx, vy);
+			swingBI[cptr].setSpeed(jsl2.getValue());
+			swingBI[cptr].setDecline(IsDecline);
+			swingBI[cptr].setPower(power);
+			swingBI[cptr].setCoefficient(getCoefficient());
+			cptr = (cptr + 1) % swingBI.length;
+		    }
+		    IsMessage = false;
+		}
+
 		public void mouseReleased(MouseEvent arg0) {
+		    if(!ShowFrameRate)
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
 				mrp = arg0.getPoint();
 				if(0==MouseAcitivity){
-					cptr = cptr % swingBI.length;
-					synchronized(swingBI[cptr]){
-						swingBI[cptr].setCenterX(mpp.x);
-						swingBI[cptr].setCenterY(mpp.y);
-						int r = length(mpp, mrp);
-						int power = jsl1.getValue();
-						int vx = 0 < r ? power * (mrp.x - mpp.x) / r : 0;
-						int vy = 0 < r ? power * (mrp.y - mpp.y) / r : 0;
-						swingBI[cptr].setRadius(r, r);
-						swingBI[cptr].setVector(vx, vy);
-						swingBI[cptr].setSpeed(jsl2.getValue());
-						swingBI[cptr].setDecline(IsDecline);
-						swingBI[cptr].setPower(power);
-						swingBI[cptr].setCoefficient(getCoefficient());
-						cptr = (cptr + 1) % swingBI.length;
-					}
+				    setSwingBI(mpp, mrp);
 				}
 				MouseStatus = 0;
 				MouseAcitivity = 0;
@@ -920,11 +1049,14 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 
 		public void mouseDragged(MouseEvent e) {
+		    if(!ShowFrameRate){
 			mmp = e.getPoint();
 			MouseClickedTime = 0;
+		    }
 		}
 
 		public void mouseMoved(MouseEvent e) {
+		    if(!ShowFrameRate)
 			mmp = e.getPoint();
 		}
 
@@ -932,6 +1064,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				DnDConstants.ACTION_COPY, this, true);
 
 		public void dragEnter(DropTargetDragEvent arg0) {
+		    if(!ShowFrameRate)
 			arg0.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
 		}
 
@@ -939,6 +1072,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 
 		public void dragOver(DropTargetDragEvent arg0) {
+		    if(!ShowFrameRate)
 			if (arg0.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
 				arg0.acceptDrag(DnDConstants.ACTION_COPY);
 				return;
@@ -946,10 +1080,13 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				arg0.acceptDrag(DnDConstants.ACTION_COPY);
 				return;
 			}
-			arg0.rejectDrag();
+		    arg0.rejectDrag();
 		}
 
 		public void drop(DropTargetDropEvent arg0) {
+			if(ShowFrameRate){
+			    return;
+			}
 			try {
 				if (arg0.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
 					arg0.acceptDrop(DnDConstants.ACTION_COPY);
