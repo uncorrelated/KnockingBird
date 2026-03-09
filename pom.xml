@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.uncorrelated.kbird</groupId>
+    <artifactId>KnockingBird</artifactId>
+    <version>1.03</version>
+    <packaging>jar</packaging>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>25</maven.compiler.release>
+	<maven.compiler.source>8</maven.compiler.source>
+	<maven.compiler.target>8</maven.compiler.target>
+        <exec.mainClass>com.uncorrelated.kbird.Knocking</exec.mainClass>
+    </properties>
+
+    <build>
+	<plugins>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-compiler-plugin</artifactId>
+		<version>3.15.0</version>
+		<configuration>
+		    <debug>true</debug>
+		    <debuglevel>none</debuglevel>
+		</configuration>
+	    </plugin>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-jar-plugin</artifactId>
+		<version>3.5.0</version>
+		<configuration>
+		    <archive>
+			<manifest>
+			    <mainClass>com.uncorrelated.kbird.Knocking</mainClass>
+			</manifest>
+			<manifestEntries>
+			    <Build-Time>${maven.build.timestamp}</Build-Time>
+			    <X-Project-Developer>uncorrelated zombie</X-Project-Developer>
+			</manifestEntries>
+		    </archive>
+		</configuration>
+	    </plugin>
+	</plugins>
+    </build>
+</project>
