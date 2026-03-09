@@ -47,6 +47,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -1106,7 +1108,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 								.getTransferData(DataFlavor.stringFlavor);
 						StringTokenizer st = new StringTokenizer(fnames, "\n");
 						if(st.hasMoreTokens()){
-							setImage(new URL(st.nextToken()));
+						    setImage((new URI(st.nextToken())).toURL());
 						}
 					}
 				}
@@ -1115,6 +1117,8 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				ex.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
+			} catch (URISyntaxException ex) {
+			    ex.printStackTrace();
 			} finally {
 				arg0.dropComplete(false);
 			}
