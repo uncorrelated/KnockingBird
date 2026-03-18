@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.uncorrelated.kbird</groupId>
     <artifactId>KnockingBird</artifactId>
-    <version>1.03</version>
+    <version>1.04</version>
     <packaging>jar</packaging>
     <properties>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -30,32 +30,96 @@
 		</excludes>
 	    </resource>
 	</resources>
-	<plugins>
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-compiler-plugin</artifactId>
-		<version>3.15.0</version>
-		<configuration>
-		    <debug>true</debug>
-		    <debuglevel>none</debuglevel>
-		</configuration>
-	    </plugin>
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-jar-plugin</artifactId>
-		<version>3.5.0</version>
-		<configuration>
-		    <archive>
-			<manifest>
-			    <mainClass>com.uncorrelated.kbird.Knocking</mainClass>
-			</manifest>
-			<manifestEntries>
-			    <Build-Time>${maven.build.timestamp}</Build-Time>
-			    <X-Project-Developer>uncorrelated zombie</X-Project-Developer>
-			</manifestEntries>
-		    </archive>
-		</configuration>
-	    </plugin>
-	</plugins>
     </build>
+
+    <profiles>
+	<profile>
+	    <id>github</id>
+	    <build>
+		<plugins>
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>3.15.0</version>
+			<configuration>
+			    <source>8</source> 
+			    <target>8</target>
+			    <debug>true</debug>
+			    <debuglevel>none</debuglevel>
+			</configuration>
+		    </plugin>
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-jar-plugin</artifactId>
+			<version>3.5.0</version>
+			<configuration>
+			    <archive>
+				<manifest>
+				    <mainClass>com.uncorrelated.kbird.Knocking</mainClass>
+				</manifest>
+				<manifestEntries>
+				    <Build-Time>${maven.build.timestamp}</Build-Time>
+				    <X-Project-Developer>uncorrelated zombie</X-Project-Developer>
+				</manifestEntries>
+			    </archive>
+			</configuration>
+		    </plugin>
+		</plugins>
+	    </build>
+	</profile>
+	<profile>
+	    <id>release</id>
+	    <build>
+		<plugins>
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>3.15.0</version>
+			<configuration>
+			    <source>8</source> 
+			    <target>8</target>
+			    <debug>true</debug>
+			    <debuglevel>none</debuglevel>
+			</configuration>
+		    </plugin>
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-jar-plugin</artifactId>
+			<version>3.5.0</version>
+			<configuration>
+			    <archive>
+				<manifest>
+				    <mainClass>com.uncorrelated.kbird.Knocking</mainClass>
+				</manifest>
+				<manifestEntries>
+				    <Build-Time>${maven.build.timestamp}</Build-Time>
+				    <X-Project-Developer>uncorrelated zombie</X-Project-Developer>
+				</manifestEntries>
+			    </archive>
+			</configuration>
+		    </plugin>
+		    <plugin>
+			<artifactId>maven-assembly-plugin</artifactId>
+			<version>3.6.0</version>
+			<configuration>
+			    <descriptors>
+				<descriptor>src/main/assembly/bin.xml</descriptor>
+			    </descriptors>
+			    <finalName>${project.artifactId}</finalName>
+			    <appendAssemblyId>false</appendAssemblyId>
+			</configuration>
+			<executions>
+			    <execution>
+				<id>make-assembly</id>
+				<phase>package</phase>
+				<goals>
+				    <goal>single</goal>
+				</goals>
+			    </execution>
+			</executions>
+		    </plugin>
+		</plugins>
+	    </build>
+	</profile>
+    </profiles>
 </project>

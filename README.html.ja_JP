@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8" />
+<title>取扱説明書 - Knocking Bird</title>
+</head>
+<body>
+<h1>Knocking Bird 取扱説明書</h1>
+
+<h2>1. ソフトの概要</h2>
+<p>画像ファイルの一部分を『揺らす』アプリケーションです。また、マルチコア対応の内部構造を持ち、ベンチマーク・モードでフレームレートを表示することで、マルチコアCPUのパフォーマンスを測定することができます。</p>
+
+<h2>2. 作者への連絡先(メールアドレス、掲示板 等)</h2>
+
+<a href="mailto:uncorrelated@yahoo.co.jp">uncorrelated@yahoo.co.jp</a>
+
+<h2>3. 取り扱い種別(フリーソフト、シェアウェア 等)</h2>
+
+<p>本ソフトウェアは、フリーソフトで利用者の責任において自由に利用・配布が可能です。</p>
+<p>ソフトウェア・ライセンスはGNU General Public License (GPL) バージョン2.0とします。GPL 2.0の詳細は添付の gpl-2.0.txt を参照してください。</p>
+
+<h2>4. 動作環境</h2>
+
+<p>Java 8以降で動作します。最新版のJava実行環境（JRE）を推奨します。</p>
+
+<h2>5. インストール・アンインストール方法</h2>
+
+<p>ファイルを展開した後に、JREの入ったシステムにおいてダブルクリックを行うか、java -jar KnockingBird.jar として起動してください。なお、オプションとして引数として画像ファイルを取ることができます。</p>
+
+<h2>6. 最新版の配布元</h2>
+
+<p>最新のバイナリとソースコードは以下のサイトで配布しています。</p>
+
+<a href="https://github.com/uncorrelated/KnockingBird" target="_blank">https://github.com/uncorrelated/KnockingBird</a>
+
+<h2>7. 謝辞</h2>
+<p>デフォルト画像とアイコン画像は、他者の作成した以下の著作物を借用しております。これらは、LGPLもしくはCreative Commons Licenseで配布されており、GPLソフトウェアへの再加工や他の著作物への組み込みが許可されています。</p>
+<ol>
+<li><a href="http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/" target="_blank">http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/</a></li>
+<li><a href="http://www.iconlet.com/info/53985_fileimport_22x22" target="_blank">http://www.iconlet.com/info/53985_fileimport_22x22</a></li>
+<li><a href="http://www.iconlet.com/info/80456_editcopy_24x24" target="_blank">http://www.iconlet.com/info/80456_editcopy_24x24</a></li>
+<li><a href="http://www.iconlet.com/info/80456_editcopy_24x24" target="_blank">http://www.iconlet.com/info/80041_editpaste_22x22</a></li>
+<li><a href="http://www.iconlet.com/info/80456_editcopy_24x24" target="_blank">http://www.iconlet.com/info/53983_player_stop_22x22</a></li>
+<li><a href="http://www.iconlet.com/info/80456_editcopy_24x24" target="_blank">http://www.iconlet.com/info/80319_restart_22x22</a></li>
+<li><a href="http://www.iconlet.com/info/80456_editcopy_24x24" target="_blank">http://www.iconlet.com/info/53872_player_pause_22x22</a></li>
+<li><a href="http://www.iconlet.com/info/4188_dialog-information_22x22" target="_blank">http://www.iconlet.com/info/4188_dialog-information_22x22</a></li>
+<li><a href="http://www.iconlet.com/info/7453_help_22x22" target="_blank">http://www.iconlet.com/info/7453_help_22x22</a></li>
+</ol>
+</body>
+</html>
