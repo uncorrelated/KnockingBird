@@ -286,13 +286,13 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 				jsl1.setValue(sl_init[0]);
 				jsl2.setValue(sl_init[1]);
 				jsl3.setValue(sl_init[2]);
-				canvas.showMessage();
 				waitOfThread = 1000 / FrameRate;
-				stopAllSwing();
+				canvas.loadSwingBI();
 				setOperable(true);
 			    } else {
 				setOperable(false);
 				ShowFrameRate = true;
+				canvas.saveSwingBI();
 				waitOfThread = 1000 / BenchmarkFrameRate;
 				sl_init[0] = jsl1.getValue();
 				sl_init[1] = jsl2.getValue();
@@ -1041,6 +1041,25 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		    IsMessage = false;
 		}
 
+		private SwingBufferedImage[] saved = new SwingBufferedImage[10];
+		private int saved_cptr = 0;
+
+		public void saveSwingBI(){
+		    saved_cptr = cptr;
+		    for(int i = 0; i < swingBI.length; i++){
+			synchronized (swingBI[i]) {
+			    saved[i] = swingBI[i].clone();
+			}
+		    }
+		}
+		
+		public void loadSwingBI(){
+		    for(int i = 0; i < swingBI.length; i++){
+			swingBI[i] = saved[i];
+		    }
+		    cptr = saved_cptr;
+		}
+		
 		public void mouseReleased(MouseEvent arg0) {
 		    if(!ShowFrameRate)
 			if (MouseEvent.BUTTON1 == arg0.getButton()) {
@@ -1195,14 +1214,22 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	public void windowDeactivated(WindowEvent e) {
 	}
 
-	public static void main(String[] args) throws IOException {
-		Knocking[] kn = new Knocking[0<args.length ? args.length : 1];
-		if(args.length<1){
+    public static void main(String[] args) throws IOException {
+	javax.swing.SwingUtilities.invokeLater(new Runnable() {
+	    public void run() {
+		Knocking[] kn = new Knocking[0 < args.length ? args.length : 1];
+		try {
+		    if (args.length < 1) {
 			kn[0] = new Knocking(null);
-		} else {
-			for(int c=0;c<args.length && c<kn.length; c++){
-				kn[c] = new Knocking(args[c]);
+		    } else {
+			for (int c = 0; c < args.length && c < kn.length; c++) {
+			    kn[c] = new Knocking(args[c]);
 			}
+		    }
+		} catch (IOException ex) {
+		    System.getLogger(Knocking.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
 		}
-	}
+	    }
+	});
+    }
 }
