@@ -638,14 +638,21 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 	}
 
+	private void setImage(BufferedImage newImage){
+	    if(null != newImage){
+		image = newImage;
+		if(null!=canvas)
+		    canvas.showMessage();
+		setSize();
+	    }
+	}
+	
 	private void setImage(File file) {
 		FileInputStream fis;
 		try {
 			fis = new FileInputStream(file);
-			image = ImageIO.read(fis);
+			setImage(ImageIO.read(fis));
 			fis.close();
-			canvas.showMessage();
-			setSize();
 		} catch (CMMException e) {
 			JOptionPane.showMessageDialog(this ,e.getMessage(),"CMMException" ,JOptionPane.INFORMATION_MESSAGE);
 		} catch (FileNotFoundException e) {
@@ -656,10 +663,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	}
 
 	private void setImage(URL url) throws IOException {
-		image = ImageIO.read(url);
-		if(null!=canvas)
-			canvas.showMessage();
-		setSize();
+		setImage(ImageIO.read(url));
 	}
 
 	private void initImage(String fname, URL url) throws IOException {
@@ -682,13 +686,17 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private void openFileChooser(){
 		JFileChooser fc = new JFileChooser();
 	    fc.setFileFilter(new FileFilter(){
-			String[] exts = {".jpg", ".jpeg", ".png", ".gif"};
+			String[] exts = ImageIO.getReaderFormatNames();
 			public boolean accept(File f){
+				if(f.isDirectory())
+					return true;
+				String name = f.getName();
+				int lastDot = name.lastIndexOf('.');
+				if (lastDot == -1) return false;
+				String ext = name.substring(lastDot + 1).toLowerCase();
 				for(int c=0;c<exts.length;c++){
-					if(f.isDirectory())
-						return true;
-					if(f.getName().endsWith(exts[c]))
-						return true;
+				    if(0 == ext.compareToIgnoreCase(exts[c]))
+					return true;
 				}
 				return false;
 			}
