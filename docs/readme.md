@@ -1,32 +1,33 @@
-Knocking Bird 取扱説明書
+# Knocking Bird 取扱説明書
 
-1. ソフトの概要
+## ソフトの概要
 
 画像ファイルの一部分を『揺らす』アプリケーションです。
 
-2. 作者への連絡先(メールアドレス、掲示板 等)
+## 作者への連絡先(メールアドレス、掲示板 等)
 
-uncorrelated@yahoo.co.jp
+[uncorrelated@yahoo.co.jp](mailto:uncorrelated@yahoo.co.jp)
 
-3. 取り扱い種別(フリーソフト、シェアウェア 等)
+## 取り扱い種別(フリーソフト、シェアウェア 等)
 
 本ソフトウェアは、フリーソフトで利用者の責任において自由に利用・配布が可能です。
 
-4. 動作環境
+## 動作環境
 
-Java 1.5以降で動作します。最新版のJava実行環境（JRE）を推奨します。
+Java 8以降で動作します。最新版のJava実行環境（JRE）を推奨します。
 
-5. インストール・アンインストール方法
+## インストール・アンインストール方法
 
 ファイルを展開した後に、JREの入ったシステムにおいてダブルクリックを行うか、java -jar KnockingBird.jar として起動してください。
 なお、オプションとして引数として画像ファイルを取ることができます。
 
-6. その他
+## その他
 
 本アプリケーションのライセンスはGNU General Public License (GPL) バージョン2.0とします。GPL 2.0の詳細は添付の gpl-2.0.txt を参照してください。
 ソースコードは以下のサイトで配布しています。
 
-https://github.com/uncorrelated/KnockingBird
+[https://github.com/uncorrelated/KnockingBird](https://github.com/uncorrelated/KnockingBird)
 
 デフォルト画像は以下のCreative Commons Licenseの写真の転載で、再加工や他の著作物への組み込みが許可されていますが、本ソフトウェアの作者の権利物ではありません。
-http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/
+
+[http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/](http://www.flickr.com/photos/bikiniopen/3386409319/sizes/m/in/photostream/)
