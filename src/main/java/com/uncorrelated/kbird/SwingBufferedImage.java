@@ -94,6 +94,9 @@ public class SwingBufferedImage implements java.lang.Cloneable {
 		double r12 = a * (1 - b);
 		double r21 = (1 - a) * b;
 		double r22 = a * b;
+		int alpha = 0xff000000 & (int) (r11 * (0xff000000 & p11) + r12
+				* (0xff000000 & p12) + r21 * (0xff000000 & p21) + r22
+				* (0xff000000 & p22));
 		int red = 0x00ff0000 & (int) (r11 * (0x00ff0000 & p11) + r12
 				* (0x00ff0000 & p12) + r21 * (0x00ff0000 & p21) + r22
 				* (0x00ff0000 & p22));
@@ -103,7 +106,7 @@ public class SwingBufferedImage implements java.lang.Cloneable {
 		int blue = 0x000000ff & (int) (r11 * (0x000000ff & p11) + r12
 				* (0x000000ff & p12) + r21 * (0x000000ff & p21) + r22
 				* (0x000000ff & p22));
-		return red | green | blue;
+		return alpha | red | green | blue;
 	}
 
 	private BufferedImage transform(BufferedImage src, int cx, int cy, int r1, int r2,
