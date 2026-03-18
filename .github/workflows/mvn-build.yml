@@ -41,5 +41,5 @@ jobs:
       with:
         files: |
           target/*.jar
-          gpl-2.0.txt
-          readme.txt
+          docs/gpl-2.0.txt
+          docs/readme.txt
