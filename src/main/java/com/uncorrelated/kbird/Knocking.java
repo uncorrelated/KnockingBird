@@ -650,9 +650,12 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private void setImage(File file) {
 		FileInputStream fis;
 		try {
-			fis = new FileInputStream(file);
+		    fis = new FileInputStream(file);
+		    try {
 			setImage(ImageIO.read(fis));
+		    } finally {
 			fis.close();
+		    }
 		} catch (CMMException e) {
 			JOptionPane.showMessageDialog(this ,e.getMessage(),"CMMException" ,JOptionPane.INFORMATION_MESSAGE);
 		} catch (FileNotFoundException e) {
@@ -669,9 +672,12 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private void initImage(String fname, URL url) throws IOException {
 		if(null!=fname){
 			try{
-				FileInputStream fis = new FileInputStream(fname);
+			    FileInputStream fis = new FileInputStream(fname);
+			    try {
 				image = ImageIO.read(fis);
+			    } finally {
 				fis.close();
+			    }
 			} catch(IOException ex) {
 				fname = null;
 			}
