@@ -103,7 +103,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 	private volatile boolean flag = true;
 	private static ResourceBundle rb = ResourceBundle.getBundle("com.uncorrelated.kbird.Knocking");
 	private static String title = rb.getString("application.name") + "" + rb.getString("application.version");
-	private int MaximumImageSize = 480;
+	private int MinimumImageSize = 128;
 	private int MaximumIconSize = 128;
 	private int DoubleClickInterval = 1000;
 	private static volatile int NumberOfRestWindow = 0;
@@ -189,7 +189,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		NumberOfRestWindow++;
 
 		initImage(fname, this.getClass().getResource(rb.getString("default_image")));
-		MaximumImageSize = parseInt(rb.getString("maximum_image_size"), MaximumImageSize);
+		MinimumImageSize = parseInt(rb.getString("minimum_image_size"), MinimumImageSize);
 		MaximumIconSize = parseInt(rb.getString("maximum_icon_size"), MaximumIconSize);
 		DoubleClickInterval = parseInt(rb.getString("double_click_interval"), DoubleClickInterval);
 		FrameRate = parseInt(rb.getString("frame_rate"), FrameRate);
@@ -570,10 +570,38 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 	}
 	
-	private void moveCenter(Component c){
+	private Rectangle getUsableScreenBounds(){
 		Rectangle screen = getGraphicsConfiguration().getBounds();
+		Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(getGraphicsConfiguration());
+		return new Rectangle(
+				screen.x + insets.left,
+				screen.y + insets.top,
+				screen.width - insets.left - insets.right,
+				screen.height - insets.top - insets.bottom);
+	}
+
+	private void moveCenter(Component c){
+		Rectangle screen = getUsableScreenBounds();
 		c.setLocation(screen.x + screen.width/2  - c.getSize().width/2,
 				screen.y + screen.height/2 - c.getSize().height/2);
+	}
+
+	private void ensureOnScreen(Component c){
+		Rectangle screen = getUsableScreenBounds();
+		Point loc = c.getLocation();
+		Dimension size = c.getSize();
+		int x = loc.x;
+		int y = loc.y;
+		if (x + size.width > screen.x + screen.width)
+			x = screen.x + screen.width - size.width;
+		if (y + size.height > screen.y + screen.height)
+			y = screen.y + screen.height - size.height;
+		if (x < screen.x)
+			x = screen.x;
+		if (y < screen.y)
+			y = screen.y;
+		if (x != loc.x || y != loc.y)
+			c.setLocation(x, y);
 	}
 	
 	public double getCoefficient(){
@@ -625,8 +653,13 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 					swingBI[c].reset();
 				}
 			}
-			transformed = image = rescaleImage(image, MaximumImageSize);
-			Image icon = rescaleImage(image, MaximumIconSize);
+			Rectangle screen = getUsableScreenBounds();
+			Insets frameInsets = getInsets();
+			Dimension baseSize = getPreferredSize();
+			int maxWidth = Math.max(1, screen.width - frameInsets.left - frameInsets.right);
+			int maxHeight = Math.max(1, screen.height - baseSize.height);
+			transformed = image = rescaleImage(image, MinimumImageSize, maxWidth, maxHeight);
+			Image icon = rescaleImageForIcon(image, MaximumIconSize);
 			setIconImage(icon);
 			if (null != canvas) {
 				canvas.setSize(image.getWidth(), image.getHeight());
@@ -634,6 +667,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			}
 			Dimension d = getPreferredSize();
 			setSize(d.width, d.height);
+			ensureOnScreen(this);
 			repaint();
 		}
 	}
@@ -740,36 +774,64 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 		}
 	}
 
-	public BufferedImage rescaleImage(BufferedImage image, int maximum_size) {
+	public BufferedImage rescaleImageForIcon(BufferedImage image, int maximum_size) {
+		return rescaleImage(image, 0, maximum_size, maximum_size);
+	}
+
+	public BufferedImage rescaleImage(BufferedImage image, int minimum_size, int maximum_width, int maximum_height) {
 		int original_height = image.getHeight();
 		int destination_height = original_height;
 		int original_width = image.getWidth();
 		int destination_width = original_width;
-		boolean IsLarge = false;
-		if (maximum_size < original_width) {
-			destination_width = maximum_size;
+		boolean isRescaled = false;
+		if (destination_width < minimum_size) {
+			destination_width = minimum_size;
 			destination_height = destination_width * original_height
 					/ original_width;
-			IsLarge = true;
+			isRescaled = true;
 		}
-		if (maximum_size < original_height) {
-			destination_height = maximum_size;
+		if (destination_height < minimum_size) {
+			destination_height = minimum_size;
 			destination_width = destination_height * original_width
 					/ original_height;
-			IsLarge = true;
+			isRescaled = true;
 		}
-		if (IsLarge) {
-			float scaling = ((float) (destination_width + 1))
-					/ ((float) original_width);
+		if (maximum_width < destination_width) {
+			destination_width = maximum_width;
+			destination_height = destination_width * original_height
+					/ original_width;
+			isRescaled = true;
+		}
+		if (maximum_height < destination_height) {
+			destination_height = maximum_height;
+			destination_width = destination_height * original_width
+					/ original_height;
+			isRescaled = true;
+		}
+		if (destination_width < 1) {
+			destination_width = 1;
+		}
+		if (destination_height < 1) {
+			destination_height = 1;
+		}
+		if (isRescaled && (destination_width != original_width || destination_height != original_height)) {
+			double scalingX = ((double) destination_width)
+					/ ((double) original_width);
+			double scalingY = ((double) destination_height)
+					/ ((double) original_height);
 			HashMap hm = new HashMap();
 			hm.put(RenderingHints.KEY_INTERPOLATION,
 					RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 			hm.put(RenderingHints.KEY_DITHERING,
 					RenderingHints.VALUE_DITHER_ENABLE);
+			int type = image.getType();
+			if (BufferedImage.TYPE_CUSTOM == type) {
+				type = BufferedImage.TYPE_INT_ARGB;
+			}
 			BufferedImage image2 = new BufferedImage(destination_width,
-					destination_height, image.getType());
+					destination_height, type);
 			AffineTransformOp atfp = new AffineTransformOp(
-					AffineTransform.getScaleInstance(scaling, scaling),
+					AffineTransform.getScaleInstance(scalingX, scalingY),
 					new RenderingHints(hm));
 			atfp.filter(image, image2);
 			image = image2;
