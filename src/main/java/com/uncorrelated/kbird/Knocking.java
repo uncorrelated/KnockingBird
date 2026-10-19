@@ -205,7 +205,10 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 
 		canvas = new ImgCanvas();
 		gbl.setConstraints(canvas, makeGridBagConstraints(0));
-		add(canvas);
+		Container c_canvas = new Container();
+		c_canvas.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+		c_canvas.add(canvas);
+		add(c_canvas);
 
 		Container jsls1 = new Container();
 		jsls1.setLayout(new FlowLayout());
