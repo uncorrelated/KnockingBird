@@ -1298,7 +1298,7 @@ public class Knocking extends JFrame implements WindowListener, Runnable {
 			}
 		    }
 		} catch (IOException ex) {
-		    System.getLogger(Knocking.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+		    ex.printStackTrace();
 		}
 	    }
 	});
